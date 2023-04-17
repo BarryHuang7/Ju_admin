@@ -2,7 +2,10 @@
   import { ref, onMounted, reactive, h } from 'vue';
   import { getFileList, toHttp } from '@/api/table/list';
   import { UploadFileInfo, DataTableColumns, NImage, NButton, NPopconfirm } from 'naive-ui';
+  import { useUserStoreWidthOut } from '@/store/modules/user';
 
+  const userStore = useUserStoreWidthOut();
+  const token = userStore.getToken;
   // 列表数据
   const loadDataTable = ref<listType[]>([]);
   // 表格类型
@@ -203,12 +206,12 @@
     };
 
     await toHttp(url, type, params).then((res) => {
-      if (res.data.code === 200) {
+      if (res.code === 200) {
         window['$message'].success('新增成功');
         closeModal();
         getList();
       } else {
-        window['$message'].error(res.data.message);
+        window['$message'].error(res.message);
       }
     });
   };
@@ -232,12 +235,12 @@
     };
 
     await toHttp(url, type, params).then((res) => {
-      if (res.data.code === 200) {
+      if (res.code === 200) {
         window['$message'].success('编辑成功');
         closeModal();
         getList();
       } else {
-        window['$message'].error(res.data.message);
+        window['$message'].error(res.message);
       }
     });
   };
@@ -256,11 +259,11 @@
     };
 
     await toHttp(url, type, params).then((res) => {
-      if (res.data.code === 200) {
+      if (res.code === 200) {
         window['$message'].success('删除成功');
         getList();
       } else {
-        window['$message'].error(res.data.message);
+        window['$message'].error(res.message);
       }
     });
   };
@@ -436,6 +439,9 @@
           <span inline-block style="width: 45%">
             <n-upload
               :action="`${domainAddress}:8001/api/h/uploadFile`"
+              :headers="{
+                Authorization: `Bearer ${token}`,
+              }"
               :default-file-list="imgsList"
               list-type="image-card"
               :max="1"

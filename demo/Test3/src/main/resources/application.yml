@@ -2,6 +2,8 @@ server:
   port: 7777
   tomcat:
     uri-encoding: utf-8
+    # 设定tomcat的basedir目录，如果没有指定则使用临时目录
+    basedir: /home/app/tomcat_upload_temp
 
 # 配置数据源
 spring:
@@ -22,6 +24,17 @@ spring:
     port: 6379
     timeout: 3000
     password: 151417redis
+  servlet:
+    # 上传限定参数
+    multipart:
+      # 是否启用分段上传支持
+      enabled: true
+      # 最大请求大小
+      max-request-size: 20MB
+      # 最大文件的大小
+      max-file-size: 20MB
+      # 上传文件的中间位置
+      location: /home/app/tomcat_upload_temp
 
 # 指定映射文件的路径
 mybatis:
