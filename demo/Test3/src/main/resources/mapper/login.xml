@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.test3.dao.LoginDao">
+    <resultMap type="com.example.commons.entity.LoginInfoVO" id="loginInfoMap">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="isAdmin" column="is_admin" />
+    </resultMap>
+
+    <select id="verification" resultMap="loginInfoMap">
+        select
+            id, name, is_admin
+        from user
+        where name = #{dto.name} and password = #{dto.password}
+    </select>
+</mapper>

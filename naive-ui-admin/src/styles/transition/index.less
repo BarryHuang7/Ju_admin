@@ -1,0 +1,14 @@
+@import './base.less';
+@import './fade.less';
+@import './scale.less';
+@import './slide.less';
+@import './scroll.less';
+@import './zoom.less';
+
+html {
+  font-size: 4px; // * 方便unocss计算：1单位 = 0.25rem = 1px
+}
+
+.collapse-transition {
+  transition: 0.2s height ease-in-out, 0.2s padding-top ease-in-out, 0.2s padding-bottom ease-in-out;
+}

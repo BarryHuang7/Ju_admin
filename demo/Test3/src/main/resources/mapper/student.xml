@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.test3.dao.TestDao">
+    <resultMap type="com.example.commons.entity.Student" id="studentMap">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="age" column="age" />
+    </resultMap>
+
+    <select id="studentList" resultMap="studentMap">
+        select * from student
+    </select>
+
+    <insert id="insertFileListData" parameterType="com.example.commons.entity.FileList">
+        insert into `file_list`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="dto.title != null">
+                `title`,
+            </if>
+            <if test="dto.content != null">
+                `content`,
+            </if>
+            <if test="dto.fileName != null">
+                `file_name`,
+            </if>
+            <if test="dto.fileUrl != null">
+                `file_url`,
+            </if>
+            <if test="dto.fileDate != null">
+                `file_date`,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="dto.title != null">
+                #{dto.title},
+            </if>
+            <if test="dto.content != null">
+                #{dto.content},
+            </if>
+            <if test="dto.fileName != null">
+                #{dto.fileName},
+            </if>
+            <if test="dto.fileUrl != null">
+                #{dto.fileUrl},
+            </if>
+            <if test="dto.fileDate != null">
+                #{dto.fileDate},
+            </if>
+        </trim>
+    </insert>
+
+    <!--  批量更新  -->
+    <!-- <foreach collection="list" item="item" index="index" separator=",">
+        (
+            #{item.id}
+        )
+    </foreach> -->
+
+    <resultMap type="com.example.commons.entity.FileList" id="fileListMap">
+        <result property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="fileName" column="file_name" />
+        <result property="fileUrl" column="file_url" />
+        <result property="fileDate" column="file_date" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="getFileListData" resultMap="fileListMap">
+        select
+            id, title, content, file_name, file_url,
+            file_date, created_at
+        from file_list
+        <where>
+            <if test="dto.title != null and dto.title != ''">
+                and title like concat("%", #{dto.title}, "%")
+            </if>
+            <if test="dto.content != null and dto.content != ''">
+                and content like concat("%", #{dto.content}, "%")
+            </if>
+            <if test="dto.fileName != null and dto.fileName != ''">
+                and file_name like concat("%", #{dto.fileName}, "%")
+            </if>
+        </where>
+        order by created_at desc
+    </select>
+
+    <update id="updateFileListData">
+        update `file_list`
+        <set>
+            <if test="dto.title != null">
+                `title` = #{dto.title},
+            </if>
+            <if test="dto.content != null">
+                `content` = #{dto.content},
+            </if>
+            <if test="dto.fileName != null">
+                `file_name` = #{dto.fileName},
+            </if>
+            <if test="dto.fileUrl != null">
+                `file_url` = #{dto.fileUrl},
+            </if>
+            <if test="dto.fileDate != null">
+                `file_date` = #{dto.fileDate},
+            </if>
+            <if test="dto.updatedAt != null">
+                `updated_at` = #{dto.updatedAt},
+            </if>
+        </set>
+        where `id` = #{dto.id}
+    </update>
+
+    <select id="findFileListByIds" resultMap="fileListMap">
+        select
+            id, file_url
+        from file_list
+        where id in
+            <foreach collection="list" item="idList" open="(" separator="," close=")">
+                #{idList}
+            </foreach>
+    </select>
+
+    <delete id="deleteFileListData">
+        delete from file_list where id in
+        <foreach collection="list" item="idList" open="(" separator="," close=")">
+            #{idList}
+        </foreach>
+    </delete>
+</mapper>
