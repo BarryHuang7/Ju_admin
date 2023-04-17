@@ -290,6 +290,8 @@
     modalData.fileName = '';
     modalData.fileDate = null;
     modalData.createdAt = '';
+    modalData.fileUrl = '';
+    imgsList.value = [];
 
     // 1新增、2编辑
     modalType.value = type;
