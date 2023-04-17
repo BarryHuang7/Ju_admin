@@ -8,6 +8,12 @@
   const token = userStore.getToken;
   // 列表数据
   const loadDataTable = ref<listType[]>([]);
+  // 页码相关
+  const dataInfo = reactive({
+    total: 0,
+    pageNo: 1,
+    pageSize: 10,
+  });
   // 表格类型
   type listType = {
     id: number;
@@ -120,33 +126,32 @@
   // 获取列表数据
   const getList = async () => {
     const params = {
-      pageIndex: 1,
-      pageSize: 10,
+      pageIndex: dataInfo.pageNo,
+      pageSize: dataInfo.pageSize,
       params: {
         title: searchInfo.title,
         content: searchInfo.content,
         fileName: searchInfo.fileName,
       },
     };
-    await getFileList(params).then((res2) => {
-      loadDataTable.value = res2.data.list || [];
+    await getFileList(params).then((res) => {
+      loadDataTable.value = res.data.list || [];
+      dataInfo.total = res.data.total;
     });
   };
 
-  // 分页
-  const pagination = reactive({
-    page: 2,
-    pageSize: 5,
-    showSizePicker: true,
-    pageSizes: [3, 5, 7],
-    onChange: (page: number) => {
-      pagination.page = page;
-    },
-    onUpdatePageSize: (pageSize: number) => {
-      pagination.pageSize = pageSize;
-      pagination.page = 1;
-    },
-  });
+  // 切换页码
+  const changePage = (value: number) => {
+    dataInfo.pageNo = value;
+    getList();
+  };
+
+  // 切换每页显示数
+  const changePageSize = (value: number) => {
+    dataInfo.pageNo = 1;
+    dataInfo.pageSize = value;
+    getList();
+  };
 
   // 图片上传前
   const beforeMaterialUpload = (data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) => {
@@ -379,7 +384,24 @@
       </n-grid>
     </div>
 
-    <n-data-table :columns="columns" :data="loadDataTable" :pagination="pagination" />
+    <n-data-table :columns="columns" :data="loadDataTable" />
+
+    <p mt-8 flex justify-end>
+      <n-pagination
+        v-model:page="dataInfo.pageNo"
+        v-model:page-size="dataInfo.pageSize"
+        :item-count="dataInfo.total"
+        show-size-picker
+        :page-sizes="[10, 20, 30, 40]"
+        show-quick-jumper
+        @update:page="changePage"
+        @update:page-size="changePageSize"
+      >
+        <template #prefix="{ pageCount }">
+          共 {{ dataInfo.total }} 条数据, 共 {{ pageCount }} 页
+        </template>
+      </n-pagination>
+    </p>
 
     <n-modal v-model:show="showModal">
       <n-card
@@ -396,12 +418,7 @@
         <div mb-10 flex justify-between items-center>
           <span ml-5 class="modalTitle">标题：</span>
           <span flex-1>
-            <n-input
-              v-model:value="modalData.title"
-              style="width: 80%"
-              placeholder="请输入标题"
-              inline-block
-            />
+            <n-input v-model:value="modalData.title" style="width: 80%" placeholder="请输入标题" />
           </span>
         </div>
         <div mb-10 flex justify-between items-center>
@@ -411,7 +428,6 @@
               v-model:value="modalData.content"
               style="width: 80%"
               placeholder="请输入内容"
-              inline-block
             />
           </span>
         </div>
@@ -422,7 +438,6 @@
               v-model:value="modalData.fileName"
               style="width: 80%"
               placeholder="请输入图片名"
-              inline-block
             />
           </span>
         </div>
