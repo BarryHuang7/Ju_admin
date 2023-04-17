@@ -329,10 +329,10 @@
 </script>
 
 <template>
-  <div min-w-375 bg-white p-15>
+  <div min-w-340 bg-white p-15>
     <div mt-10 mb-10>
       <n-grid item-responsive mb-8 x-gap="12" y-gap="12">
-        <n-gi span="6">
+        <n-gi span="8">
           <div flex justify-between items-center>
             <span>标题：</span>
             <n-input
@@ -344,7 +344,7 @@
             />
           </div>
         </n-gi>
-        <n-gi span="6">
+        <n-gi span="8">
           <div flex justify-between items-center>
             <span>内容：</span>
             <n-input
@@ -356,7 +356,7 @@
             />
           </div>
         </n-gi>
-        <n-gi span="6">
+        <n-gi span="8">
           <div flex justify-between items-center>
             <span>图片名：</span>
             <n-input
@@ -368,7 +368,9 @@
             />
           </div>
         </n-gi>
-        <n-gi span="6">
+      </n-grid>
+      <n-grid>
+        <n-gi span="24">
           <div flex justify-end items-center>
             <n-button type="primary" m-r-8 @click="getList">查询</n-button>
             <n-button type="primary" m-r-8 @click="openModal(1, null)">新增</n-button>
@@ -391,9 +393,9 @@
         <template #header-extra>
           <span cursor-pointer text-30 @click="closeModal">×</span>
         </template>
-        <div mb-10>
+        <div mb-10 flex justify-between items-center>
           <span ml-5 class="modalTitle">标题：</span>
-          <span>
+          <span flex-1>
             <n-input
               v-model:value="modalData.title"
               style="width: 80%"
@@ -402,9 +404,9 @@
             />
           </span>
         </div>
-        <div mb-10>
+        <div mb-10 flex justify-between items-center>
           <span ml-5 class="modalTitle">内容：</span>
-          <span>
+          <span flex-1>
             <n-input
               v-model:value="modalData.content"
               style="width: 80%"
@@ -413,9 +415,9 @@
             />
           </span>
         </div>
-        <div mb-10>
+        <div mb-10 flex justify-between items-center>
           <span ml-5 class="modalTitle">图片名：</span>
-          <span>
+          <span flex-1>
             <n-input
               v-model:value="modalData.fileName"
               style="width: 80%"
@@ -429,7 +431,7 @@
           <span flex-1>
             <n-date-picker
               v-model:value="modalData.fileDate"
-              style="width: 94%"
+              style="width: 80%"
               type="date"
               clearable
             />

@@ -346,12 +346,18 @@
 </script>
 
 <style lang="less" scoped>
+  .layout-header::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
+  }
   .layout-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0;
-    height: @header-height;
+    // height: @header-height;
+    overflow-y: auto;
+    scrollbar-width: none; /* firefox */
+    -ms-overflow-style: none; /* IE 10+ */
     box-shadow: 0 1px 4px rgb(0 21 41 / 8%);
     transition: all 0.2s ease-in-out;
     width: 100%;
