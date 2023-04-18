@@ -8,4 +8,5 @@ import java.util.ArrayList;
 @Data
 public class FileFileDeleteDTO implements Serializable {
     private ArrayList<Integer> fileIdList;
+    private int isAdmin;
 }

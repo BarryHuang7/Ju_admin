@@ -30,6 +30,9 @@
             <if test="dto.fileDate != null">
                 `file_date`,
             </if>
+            <if test="dto.isAdmin != null">
+                `is_admin`,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="dto.title != null">
@@ -46,6 +49,9 @@
             </if>
             <if test="dto.fileDate != null">
                 #{dto.fileDate},
+            </if>
+            <if test="dto.isAdmin != null">
+                #{dto.isAdmin},
             </if>
         </trim>
     </insert>
@@ -74,6 +80,9 @@
             file_date, created_at
         from file_list
         <where>
+            <if test="dto.isAdmin == 0">
+                and is_admin = #{dto.isAdmin}
+            </if>
             <if test="dto.title != null and dto.title != ''">
                 and title like concat("%", #{dto.title}, "%")
             </if>
@@ -109,7 +118,7 @@
                 `updated_at` = #{dto.updatedAt},
             </if>
         </set>
-        where `id` = #{dto.id}
+        where `id` = #{dto.id} and `is_admin` = #{dto.isAdmin}
     </update>
 
     <select id="findFileListByIds" resultMap="fileListMap">
@@ -117,9 +126,10 @@
             id, file_url
         from file_list
         where id in
-            <foreach collection="list" item="idList" open="(" separator="," close=")">
+            <foreach collection="dto.fileIdList" item="idList" open="(" separator="," close=")">
                 #{idList}
             </foreach>
+        and is_admin = #{dto.isAdmin}
     </select>
 
     <delete id="deleteFileListData">
@@ -128,4 +138,15 @@
             #{idList}
         </foreach>
     </delete>
+
+    <resultMap type="com.example.commons.entity.GuestFileNumberVO" id="guestFileNumberMap">
+        <result property="number" column="number" />
+    </resultMap>
+
+    <select id="getGuestFileNumber" resultMap="guestFileNumberMap">
+        select
+            count(id) as number
+        from file_list
+        where is_admin = 0
+    </select>
 </mapper>

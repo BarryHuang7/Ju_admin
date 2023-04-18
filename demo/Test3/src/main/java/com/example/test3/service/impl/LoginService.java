@@ -124,19 +124,33 @@ public class LoginService implements ILoginService {
      */
     @Override
     public Result<String> loginOut() {
-        HttpServletRequest request = SpringContextUtils.getRequest();
+        String token = this.getHeaderToken();
 
-        if (request != null) {
-            String token = request.getHeader(Constants.HEADER_TOKEN);
-            if (token != null) {
-                if (redisUtils.hasKey(token)) {
-                    redisUtils.del(token);
-                    return new Result<String>().success("退出登录成功！");
-                }
-            }
+        if (!token.equals("")) {
+            redisUtils.del(token);
+            return new Result<String>().success("退出登录成功！");
         }
 
         return new Result<String>().fail("退出登录失败！");
+    }
+
+    /**
+     * 获取请求头部token
+     * @return
+     */
+    public String getHeaderToken() {
+        String token = "";
+        HttpServletRequest request = SpringContextUtils.getRequest();
+
+        if (request != null) {
+            String headerToken = request.getHeader(Constants.HEADER_TOKEN);
+            if (headerToken != null) {
+                if (redisUtils.hasKey(headerToken)) {
+                    token = headerToken;
+                }
+            }
+        }
+        return token;
     }
 
     /**
@@ -164,5 +178,23 @@ public class LoginService implements ILoginService {
                 // 签发时间
                 .setIssuedAt(new Date());
         return builder.compact();
+    }
+
+    /**
+     * 获取当前登陆者的用户信息
+     */
+    public LoginInfoVO getUserInfo() {
+        LoginInfoVO loginInfo = new LoginInfoVO();
+
+        String token = this.getHeaderToken();
+
+        if (!token.equals("")) {
+            Object id = redisUtils.get(token);
+            if (id != null) {
+                loginInfo = loginDao.findUserById(Integer.parseInt(id.toString()));
+            }
+        }
+
+        return loginInfo;
     }
 }

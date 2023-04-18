@@ -1,6 +1,5 @@
 package com.example.commons.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -9,6 +8,6 @@ import java.io.Serializable;
 public class LoginInfoVO implements Serializable {
     private Integer id;
     private String name;
-    private String isAdmin;
+    private Integer isAdmin;
     private String token;
 }

@@ -2,6 +2,7 @@ package com.example.test3.controller;
 
 import com.example.commons.entity.FileFileDeleteDTO;
 import com.example.commons.entity.FileList;
+import com.example.commons.entity.LoginInfoVO;
 import com.example.commons.entity.Student;
 import com.example.commons.groups.Insert;
 import com.example.commons.groups.Update;
@@ -9,6 +10,7 @@ import com.example.commons.tool.Result;
 import com.example.commons.tool.SimplePage;
 import com.example.test3.dao.TestDao;
 import com.example.test3.service.ITestService;
+import com.example.test3.service.impl.LoginService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class TestController {
     private final TestDao testDao;
 
     private final ITestService iTestService;
+    private final LoginService loginService;
 
     private final RedisUtils redisUtils;
 
@@ -52,7 +55,7 @@ public class TestController {
 
     @PostMapping("/setRedis")
     public void setRedis() {
-        redisUtils.set("123", "777", 5000);
+        redisUtils.set("123", "777", 50);
     }
 
     @PostMapping("/getRedis")
@@ -77,6 +80,16 @@ public class TestController {
 
     @PostMapping("/getFileListData")
     public Result<PageInfo<FileList>> getFileListData(@RequestBody SimplePage<FileList> simplePage) {
+        // 默认不让看数据
+        int flag = 0;
+        LoginInfoVO loginInfo = loginService.getUserInfo();
+        if (loginInfo != null) {
+            if (loginInfo.getIsAdmin() == 1 && loginInfo.getId() == 1) {
+                flag = 1;
+            }
+        }
+        simplePage.getParams().setIsAdmin(flag);
+
         PageHelper.startPage(simplePage.getPageIndex(), simplePage.getPageSize());
         return new Result<PageInfo<FileList>>().success(new PageInfo<>(testDao.getFileListData(simplePage.getParams())));
     }
@@ -89,5 +102,10 @@ public class TestController {
     @PostMapping("/deleteFileListData")
     public Result<String> deleteFileListData(@RequestBody FileFileDeleteDTO FileFileDeleteDTO) {
         return iTestService.deleteFileListData(FileFileDeleteDTO);
+    }
+
+    @PostMapping("/a")
+    public void a() {
+        System.out.println(loginService.getUserInfo());
     }
 }

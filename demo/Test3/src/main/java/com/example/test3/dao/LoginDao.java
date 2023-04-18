@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Param;
 
 public interface LoginDao {
     LoginInfoVO verification(@Param("dto") LoginDTO loginDTO);
+
+    LoginInfoVO findUserById(Integer id);
 }

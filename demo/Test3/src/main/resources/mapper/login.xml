@@ -14,4 +14,11 @@
         from user
         where name = #{dto.name} and password = #{dto.password}
     </select>
+
+    <select id="findUserById" resultMap="loginInfoMap">
+        select
+        id, name, is_admin
+        from user
+        where id = #{id}
+    </select>
 </mapper>

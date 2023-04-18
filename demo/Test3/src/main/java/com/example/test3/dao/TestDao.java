@@ -1,8 +1,8 @@
 package com.example.test3.dao;
 
-
 import com.example.commons.entity.FileFileDeleteDTO;
 import com.example.commons.entity.FileList;
+import com.example.commons.entity.GuestFileNumberVO;
 import com.example.commons.entity.Student;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,7 +18,9 @@ public interface TestDao {
 
     int updateFileListData(@Param("dto") FileList fileList);
 
-    ArrayList<FileList> findFileListByIds(@Param("list") ArrayList<Integer> fileIdList);
+    ArrayList<FileList> findFileListByIds(@Param("dto") FileFileDeleteDTO fileFileDeleteDTO);
 
     int deleteFileListData(@Param("list") ArrayList<Integer> fileIdList);
+
+    GuestFileNumberVO getGuestFileNumber();
 }

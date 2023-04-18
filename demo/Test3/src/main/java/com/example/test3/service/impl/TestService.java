@@ -2,6 +2,9 @@ package com.example.test3.service.impl;
 
 import com.example.commons.entity.FileFileDeleteDTO;
 import com.example.commons.entity.FileList;
+import com.example.commons.entity.GuestFileNumberVO;
+import com.example.commons.entity.LoginInfoVO;
+import com.example.commons.tool.Constants;
 import com.example.commons.tool.Result;
 import com.example.test3.dao.TestDao;
 import com.example.test3.service.ITestService;
@@ -21,6 +24,7 @@ import java.util.*;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestService implements ITestService {
 
+    private final LoginService loginService;
     private final TestDao testDao;
     // 格式化时间
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -37,6 +41,16 @@ public class TestService implements ITestService {
      */
     @Override
     public Result<String> uploadFile(MultipartFile file) {
+        // 非管理员的权限限制
+        LoginInfoVO loginInfo = loginService.getUserInfo();
+        if (loginInfo != null) {
+            if (loginInfo.getIsAdmin() != 1) {
+                if(this.getGuestFileNumber() >= Constants.GUEST_MAX_UPLOAD) {
+                    return new Result<String>().fail("已达到你权限的最大上传数！");
+                }
+            }
+        }
+
         if (!file.isEmpty()) {
             try {
                 // 获取文件上传名称
@@ -78,6 +92,17 @@ public class TestService implements ITestService {
     @Override
     public Result<String> insertFileListData(FileList fileList) {
         try {
+            // 非管理员的权限限制
+            LoginInfoVO loginInfo = loginService.getUserInfo();
+            if (loginInfo != null) {
+                if (loginInfo.getIsAdmin() != 1) {
+                    if(this.getGuestFileNumber() >= Constants.GUEST_MAX_UPLOAD) {
+                        return new Result<String>().fail("已达到你权限的最大上传数！");
+                    }
+                }
+                fileList.setIsAdmin(loginInfo.getIsAdmin());
+            }
+
             if(testDao.insertFileListData(fileList) == 1) {
                 return new Result<String>().success("保存成功！");
             }
@@ -95,6 +120,12 @@ public class TestService implements ITestService {
     @Override
     public Result<String> updateFileListData(FileList fileList) {
         try {
+            // 权限限制
+            LoginInfoVO loginInfo = loginService.getUserInfo();
+            if (loginInfo != null) {
+                fileList.setIsAdmin(loginInfo.getIsAdmin());
+            }
+
             fileList.setUpdatedAt(new Date());
             if(testDao.updateFileListData(fileList) == 1) {
                 return new Result<String>().success("编辑成功！");
@@ -117,7 +148,14 @@ public class TestService implements ITestService {
             if (fileFileDeleteDTO.getFileIdList() == null) {
                 return new Result<String>().fail("删除失败!未传参数！");
             }
-            ArrayList<FileList> fileList = testDao.findFileListByIds(fileFileDeleteDTO.getFileIdList());
+
+            // 权限限制
+            LoginInfoVO loginInfo = loginService.getUserInfo();
+            if (loginInfo != null) {
+                fileFileDeleteDTO.setIsAdmin(loginInfo.getIsAdmin());
+            }
+
+            ArrayList<FileList> fileList = testDao.findFileListByIds(fileFileDeleteDTO);
 
             // 删除文件
             for(FileList item : fileList) {
@@ -146,5 +184,13 @@ public class TestService implements ITestService {
             return new Result<String>().fail("try catch!" + e);
         }
         return new Result<String>().success("删除成功！");
+    }
+
+    /**
+     * 查询文件表非管理员传了多少个文件
+     */
+    public int getGuestFileNumber() {
+        GuestFileNumberVO guestFileNumber = testDao.getGuestFileNumber();
+        return guestFileNumber.getNumber();
     }
 }
