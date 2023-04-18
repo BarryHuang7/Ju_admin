@@ -159,7 +159,7 @@
       const { getNavMode, getNavTheme, getHeaderSetting, getMenuSetting, getCrumbsSetting } =
         useProjectSetting();
 
-      const { username } = userStore?.info || {};
+      const username = userStore?.info.name || '';
 
       const drawerSetting = ref();
 
@@ -275,17 +275,17 @@
 
       // 图标列表
       const iconList = [
-        {
-          icon: 'SearchOutlined',
-          tips: '搜索',
-        },
-        {
-          icon: 'GithubOutlined',
-          tips: 'github',
-          eventObject: {
-            click: () => window.open('https://github.com/jekip/naive-ui-admin'),
-          },
-        },
+        // {
+        //   icon: 'SearchOutlined',
+        //   tips: '搜索',
+        // },
+        // {
+        //   icon: 'GithubOutlined',
+        //   tips: 'github',
+        //   eventObject: {
+        //     click: () => window.open('https://github.com/jekip/naive-ui-admin'),
+        //   },
+        // },
         {
           icon: 'LockOutlined',
           tips: '锁屏',
@@ -295,10 +295,10 @@
         },
       ];
       const avatarOptions = [
-        {
-          label: '个人设置',
-          key: 1,
-        },
+        // {
+        //   label: '个人设置',
+        //   key: 1,
+        // },
         {
           label: '退出登录',
           key: 2,

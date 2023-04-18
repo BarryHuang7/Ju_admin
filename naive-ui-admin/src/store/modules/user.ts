@@ -76,91 +76,26 @@ export const useUserStore = defineStore({
 
     // 获取用户信息
     GetInfo() {
-      const that = this;
-      return new Promise((resolve, reject) => {
-        // getUserInfo()
-        //   .then((res) => {
-        const res = {
-          code: 200,
-          result: {
-            userId: 1,
-            username: 'admin',
-            realName: 'Admin',
-            avatar: 'http://dummyimage.com/88x31',
-            desc: 'manager',
-            password: 'DEMEX',
-            token: 'RQOPOAGROYZDETKIFHDVMLMRMZHIDXWQ',
-            permissions: [
-              {
-                label: '主控台',
-                value: 'dashboard_console',
-              },
-              // {
-              //   label: '监控页',
-              //   value: 'dashboard_monitor',
-              // },
-              // {
-              //   label: '工作台',
-              //   value: 'dashboard_workplace',
-              // },
-              // {
-              //   label: '基础列表',
-              //   value: 'basic_list',
-              // },
-              // {
-              //   label: '基础列表删除',
-              //   value: 'basic_list_delete',
-              // },
-            ],
-          },
-          message: 'ok',
-          type: 'success',
-        };
-        const result = {
-          userId: 1,
-          username: 'admin',
-          realName: 'Admin',
-          avatar: 'http://dummyimage.com/88x31',
-          desc: 'manager',
-          password: 'DEMEX',
-          token: 'RQOPOAGROYZDETKIFHDVMLMRMZHIDXWQ',
-          permissions: [
-            {
-              label: '主控台',
-              value: 'dashboard_console',
-            },
-            // {
-            //   label: '监控页',
-            //   value: 'dashboard_monitor',
-            // },
-            // {
-            //   label: '工作台',
-            //   value: 'dashboard_workplace',
-            // },
-            // {
-            //   label: '基础列表',
-            //   value: 'basic_list',
-            // },
-            // {
-            //   label: '基础列表删除',
-            //   value: 'basic_list_delete',
-            // },
-          ],
-        };
-        if (result.permissions && result.permissions.length) {
-          const permissionsList = result.permissions;
-          that.setPermissions(permissionsList);
-          that.setUserInfo(result);
-        } else {
-          reject(new Error('getInfo: permissionsList must be a non-null array !'));
-        }
-        that.setAvatar(result.avatar);
-        resolve(res);
-        // })
-        // .catch((error) => {
-        //   reject(error);
-        // });
-      });
+      // const that = this;
+      return this.getUserInfo;
+      // return new Promise((resolve, reject) => {
+      //   getUserInfo()
+      //     .then((res) => {
+      //       console.log(res);
+      //       // if (result.permissions && result.permissions.length) {
+      //       //   const permissionsList = result.permissions;
+      //       //   that.setPermissions(permissionsList);
+      //       //   that.setUserInfo(result);
+      //       // } else {
+      //       //   reject(new Error('getInfo: permissionsList must be a non-null array !'));
+      //       // }
+      //       // that.setAvatar(result.avatar);
+      //       resolve(res);
+      //     })
+      //     .catch((error) => {
+      //       reject(error);
+      //     });
+      // });
     },
 
     // 登出

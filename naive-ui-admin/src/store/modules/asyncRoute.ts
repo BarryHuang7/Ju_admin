@@ -113,31 +113,7 @@ export const useAsyncRouteStore = defineStore({
         }
       }
       accessedRouters = accessedRouters.filter(routeFilter);
-      // console.log(accessedRouters);
-      // const a = [
-      //   {
-      //     path: '/image',
-      //     name: 'Image',
-      //     redirect: '/image/image-list',
-      //     meta: {
-      //       title: '图片列表',
-      //       sort: 1,
-      //     },
-      //     children: [
-      //       {
-      //         path: 'image-list',
-      //         name: 'image-list',
-      //         meta: {
-      //           title: '图片列表',
-      //         },
-      //       },
-      //     ],
-      //     component: () => import('./src/layout/index.vue?t=1681349671184'),
-      //   },
-      // ];
-      accessedRouters = [accessedRouters[0]];
-      // console.log('123');
-      // console.log(accessedRouters);
+
       this.setRouters(accessedRouters);
       this.setMenus(accessedRouters);
       return toRaw(accessedRouters);

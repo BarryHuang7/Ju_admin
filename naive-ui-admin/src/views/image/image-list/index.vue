@@ -393,7 +393,6 @@
         :item-count="dataInfo.total"
         show-size-picker
         :page-sizes="[10, 20, 30, 40]"
-        show-quick-jumper
         @update:page="changePage"
         @update:page-size="changePageSize"
       >
