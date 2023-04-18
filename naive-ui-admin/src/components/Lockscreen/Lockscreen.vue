@@ -2,14 +2,14 @@
   <div
     :class="{ onLockLogin: showLogin }"
     class="lockscreen"
-    @keyup="onLockLogin(true)"
+    @keyup="unlock()"
     @mousedown.stop
     @contextmenu.prevent
   >
     <template v-if="!showLogin">
       <div class="lock-box">
         <div class="lock">
-          <span class="lock-icon" title="解锁屏幕" @click="onLockLogin(true)">
+          <span class="lock-icon" title="解锁屏幕" @click="unlock()">
             <n-icon>
               <lock-outlined />
             </n-icon>
@@ -37,7 +37,7 @@
     </template>
 
     <!--登录-->
-    <template v-if="showLogin">
+    <!-- <template v-if="showLogin">
       <div class="login-box">
         <n-avatar :size="128">
           <n-icon>
@@ -70,101 +70,106 @@
           <div><a @click="onLogin">进入系统</a></div>
         </div>
       </div>
-    </template>
+    </template> -->
   </div>
 </template>
 
 <script lang="ts">
   import { defineComponent, reactive, toRefs } from 'vue';
-  import { ResultEnum } from '@/enums/httpEnum';
+  // import { ResultEnum } from '@/enums/httpEnum';
   import recharge from './Recharge.vue';
   import {
     LockOutlined,
-    LoadingOutlined,
-    UserOutlined,
+    // LoadingOutlined,
+    // UserOutlined,
     ApiOutlined,
-    ArrowRightOutlined,
+    // ArrowRightOutlined,
     WifiOutlined,
   } from '@vicons/antd';
 
-  import { useRouter, useRoute } from 'vue-router';
+  // import { useRouter, useRoute } from 'vue-router';
   import { useOnline } from '@/hooks/useOnline';
   import { useTime } from '@/hooks/useTime';
   import { useBattery } from '@/hooks/useBattery';
   import { useLockscreenStore } from '@/store/modules/lockscreen';
-  import { useUserStore } from '@/store/modules/user';
+  // import { useUserStore } from '@/store/modules/user';
 
   export default defineComponent({
     name: 'Lockscreen',
     components: {
       LockOutlined,
-      LoadingOutlined,
-      UserOutlined,
-      ArrowRightOutlined,
+      // LoadingOutlined,
+      // UserOutlined,
+      // ArrowRightOutlined,
       ApiOutlined,
       WifiOutlined,
       recharge,
     },
     setup() {
       const useLockscreen = useLockscreenStore();
-      const userStore = useUserStore();
+      // const userStore = useUserStore();
 
       // 获取时间
       const { month, day, hour, minute, second, week } = useTime();
       const { online } = useOnline();
 
-      const router = useRouter();
-      const route = useRoute();
+      // const router = useRouter();
+      // const route = useRoute();
 
       const { battery, batteryStatus, calcDischargingTime, calcChargingTime } = useBattery();
-      const userInfo: object = userStore.getUserInfo || {};
-      const username = userInfo['username'] || '';
+      // const userInfo: object = userStore.getUserInfo || {};
+      // const username = userInfo['username'] || '';
       const state = reactive({
         showLogin: false,
-        loginLoading: false, // 正在登录
-        isLoginError: false, //密码错误
-        errorMsg: '密码错误',
-        loginParams: {
-          username: username || '',
-          password: '',
-        },
+        // loginLoading: false, // 正在登录
+        // isLoginError: false, //密码错误
+        // errorMsg: '密码错误',
+        // loginParams: {
+        //   username: username || '',
+        //   password: '',
+        // },
       });
 
       // 解锁登录
       const onLockLogin = (value: boolean) => (state.showLogin = value);
 
-      // 登录
-      const onLogin = async () => {
-        if (!state.loginParams.password.trim()) {
-          return;
-        }
-        const params = {
-          isLock: true,
-          ...state.loginParams,
-        };
-        state.loginLoading = true;
-        const { code, message } = await userStore.login(params);
-        if (code === ResultEnum.SUCCESS) {
-          onLockLogin(false);
-          useLockscreen.setLock(false);
-        } else {
-          state.errorMsg = message;
-          state.isLoginError = true;
-        }
-        state.loginLoading = false;
+      const unlock = () => {
+        onLockLogin(true);
+        useLockscreen.setLock(false);
       };
 
+      // 登录
+      // const onLogin = async () => {
+      //   if (!state.loginParams.password.trim()) {
+      //     return;
+      //   }
+      //   const params = {
+      //     isLock: true,
+      //     ...state.loginParams,
+      //   };
+      //   state.loginLoading = true;
+      //   const { code, message } = await userStore.login(params);
+      //   if (code === ResultEnum.SUCCESS) {
+      //     onLockLogin(false);
+      //     useLockscreen.setLock(false);
+      //   } else {
+      //     state.errorMsg = message;
+      //     state.isLoginError = true;
+      //   }
+      //   state.loginLoading = false;
+      // };
+
       //重新登录
-      const goLogin = () => {
-        onLockLogin(false);
-        useLockscreen.setLock(false);
-        router.replace({
-          path: '/login',
-          query: {
-            redirect: route.fullPath,
-          },
-        });
-      };
+      // const goLogin = () => {
+      //   onLockLogin(false);
+      //   useLockscreen.setLock(false);
+      //   router.replace({
+      //     path: '/login',
+      //     query: {
+      //       redirect: route.fullPath,
+      //     },
+      //   });
+      // };
 
       return {
         ...toRefs(state),
@@ -180,8 +185,9 @@
         calcDischargingTime,
         calcChargingTime,
         onLockLogin,
-        onLogin,
-        goLogin,
+        // onLogin,
+        unlock,
+        // goLogin,
       };
     },
   });

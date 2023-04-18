@@ -2,7 +2,7 @@ import logoImage from '@/assets/images/logo.png';
 import loginImage from '@/assets/images/account-logo.png';
 
 export const websiteConfig = Object.freeze({
-  title: '菊の第一个网站',
+  title: '菊の网站',
   logo: logoImage,
   loginImage: loginImage,
   loginDesc: '前后端自主搭建',

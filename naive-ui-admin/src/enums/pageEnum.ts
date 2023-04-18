@@ -6,9 +6,9 @@ export enum PageEnum {
   REDIRECT = '/redirect',
   REDIRECT_NAME = 'Redirect',
   // 首页
-  BASE_HOME = '/image',
+  BASE_HOME = '/home',
   //首页跳转默认路由
-  BASE_HOME_REDIRECT = '/image/image-list',
+  BASE_HOME_REDIRECT = '/home/index',
   // BASE_HOME_REDIRECT = '/dashboard/console',
   // 错误
   ERROR_PAGE_NAME = 'ErrorPage',

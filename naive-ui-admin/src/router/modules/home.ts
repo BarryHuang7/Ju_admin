@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { TableOutlined } from '@vicons/antd';
+import { HomeOutlined } from '@vicons/antd';
 import { renderIcon } from '@/utils/index';
 
 /**
@@ -16,23 +16,31 @@ import { renderIcon } from '@/utils/index';
  * */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/image',
-    name: 'Image',
-    redirect: '/image/image-list',
+    path: '/home',
+    name: 'Home',
+    redirect: '/home/index',
     component: Layout,
     meta: {
-      title: '图片',
-      icon: renderIcon(TableOutlined),
-      sort: 2,
+      title: '首页',
+      icon: renderIcon(HomeOutlined),
+      sort: 1,
     },
     children: [
       {
-        path: 'image-list',
-        name: 'image-list',
+        path: 'index',
+        name: 'index',
         meta: {
-          title: '图片列表',
+          title: '首页',
         },
-        component: () => import('@/views/image/image-list/index.vue'),
+        component: () => import('@/views/home/index.vue'),
+      },
+      {
+        path: 'loading',
+        name: 'loading',
+        meta: {
+          title: 'loading',
+        },
+        component: () => import('@/views/iframe/index.vue'),
       },
     ],
   },
