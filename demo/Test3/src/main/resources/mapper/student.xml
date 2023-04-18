@@ -118,7 +118,10 @@
                 `updated_at` = #{dto.updatedAt},
             </if>
         </set>
-        where `id` = #{dto.id} and `is_admin` = #{dto.isAdmin}
+        where `id` = #{dto.id}
+            <if test="dto.isAdmin == 0">
+                and `is_admin` = #{dto.isAdmin}
+            </if>
     </update>
 
     <select id="findFileListByIds" resultMap="fileListMap">
@@ -129,7 +132,9 @@
             <foreach collection="dto.fileIdList" item="idList" open="(" separator="," close=")">
                 #{idList}
             </foreach>
-        and is_admin = #{dto.isAdmin}
+            <if test="dto.isAdmin == 0">
+                and `is_admin` = #{dto.isAdmin}
+            </if>
     </select>
 
     <delete id="deleteFileListData">
