@@ -3,6 +3,7 @@
 //import org.springframework.scheduling.annotation.Scheduled;
 //import org.springframework.stereotype.Component;
 //
+// 任务类
 //@Component
 //public class TestTask {
 //

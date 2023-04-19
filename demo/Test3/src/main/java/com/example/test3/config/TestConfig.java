@@ -1,6 +1,7 @@
-package com.example.test3.filter;
+package com.example.test3.config;
 
 import com.example.test3.controller.RedisUtils;
+import com.example.test3.filter.TestInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -10,6 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * 拦截器配置类
+ */
 @Configuration
 public class TestConfig extends WebMvcConfigurationSupport {
 

@@ -1,4 +1,4 @@
-package com.example.test3.controller;
+package com.example.test3.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -8,6 +8,9 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * redis配置类
+ */
 @Configuration
 public class RedisConfig {
 

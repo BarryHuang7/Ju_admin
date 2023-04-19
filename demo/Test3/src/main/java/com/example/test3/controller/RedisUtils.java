@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * redis工具类
+ */
 @Component
 public class RedisUtils {
     @Autowired

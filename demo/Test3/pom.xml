@@ -20,7 +20,7 @@
     </properties>
 
     <dependencies>
-        <!--整合jdbc  starter:加入数据源的启动依赖: springboot启动时会加载对应的自动装配类。-->
+        <!--    整合jdbc  starter:加入数据源的启动依赖: springboot启动时会加载对应的自动装配类。   -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -38,14 +38,14 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!--引入mybatis的启动依赖-->
+        <!--    引入mybatis的启动依赖  -->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.0.1</version>
         </dependency>
 
-        <!--pageHelper的启动依赖 自动装配拦截器-->
+        <!--    pageHelper的启动依赖 自动装配拦截器 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
@@ -88,6 +88,12 @@
             <artifactId>Commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!--    websocket连接需要使用到的包  -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
     </dependencies>
 

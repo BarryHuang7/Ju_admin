@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * 拦截器实现类
+ */
 public class TestInterceptor implements HandlerInterceptor {
 
     private final RedisUtils redisUtils;

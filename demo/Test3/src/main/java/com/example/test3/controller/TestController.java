@@ -6,6 +6,7 @@ import com.example.commons.entity.LoginInfoVO;
 import com.example.commons.entity.Student;
 import com.example.commons.groups.Insert;
 import com.example.commons.groups.Update;
+import com.example.commons.tool.Constants;
 import com.example.commons.tool.Result;
 import com.example.commons.tool.SimplePage;
 import com.example.test3.dao.TestDao;
@@ -104,8 +105,8 @@ public class TestController {
         return iTestService.deleteFileListData(FileFileDeleteDTO);
     }
 
-    @PostMapping("/a")
-    public void a() {
-        System.out.println(loginService.getUserInfo());
+    @PostMapping("/sendTimingMessage")
+    public void sendTimingMessage() {
+        redisUtils.set(Constants.REDIS_WEBSOCKET_PREFIX + "2", "", 5);
     }
 }
