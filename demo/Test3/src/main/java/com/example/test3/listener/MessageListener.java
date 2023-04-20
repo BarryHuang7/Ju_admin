@@ -1,6 +1,7 @@
 package com.example.test3.listener;
 
 import com.example.commons.tool.Constants;
+import com.example.commons.tool.Result;
 import com.example.test3.controller.WebSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,8 @@ public class MessageListener extends KeyExpirationEventMessageListener {
         if (expiredKey.startsWith(Constants.REDIS_WEBSOCKET_PREFIX)) {
             String userId = expiredKey.substring(Constants.REDIS_WEBSOCKET_PREFIX.length());
             log.info("给用户" + userId + "发送消息");
-            webSocket.sendMessage(userId, "您的余额不足10元。");
+            String msg = new Result<>(200, "您的余额不足10元。").toJson();
+            webSocket.sendMessage(userId, msg);
         }
     }
 }

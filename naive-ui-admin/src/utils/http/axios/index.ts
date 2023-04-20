@@ -57,6 +57,9 @@ const transform: AxiosTransform = {
     const $message = window['$message'];
 
     if (!data) {
+      if (res.status === ResultEnum.SUCCESS) {
+        return data;
+      }
       // return '[HTTP] Request has no return value';
       throw new Error('请求出错，请稍候重试');
     }
