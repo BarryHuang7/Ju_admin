@@ -15,6 +15,7 @@ import com.example.test3.service.impl.LoginService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.ParseException;
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("h")
@@ -107,6 +109,8 @@ public class TestController {
 
     @PostMapping("/sendTimingMessage")
     public void sendTimingMessage() {
+        log.info("发送消息");
+        log.error("发送错误消息");
         redisUtils.set(Constants.REDIS_WEBSOCKET_PREFIX + "2", "", 5);
     }
 }
