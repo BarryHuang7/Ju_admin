@@ -47,7 +47,7 @@ public class WebSocket {
         this.session = session;
         webSocketsBeanMap.put(this.userId, this);
 
-        System.out.println(this.userId + "建立了连接，当前连接人数：" + webSocketsBeanMap.size() + "人。");
+        log.info(this.userId + "建立了连接，当前连接人数：" + webSocketsBeanMap.size() + "人。");
     }
 
 
@@ -57,7 +57,7 @@ public class WebSocket {
     @OnClose
     public void onClose() {
         webSocketsBeanMap.remove(this.userId);
-        System.out.println(this.userId + "断开了连接");
+        log.info(this.userId + "断开了连接");
     }
 
 
@@ -73,7 +73,7 @@ public class WebSocket {
             String msg = new Result<>(200, "你输入了：" + message).toJson();
             this.session.getBasicRemote().sendText(msg);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("消息达到报错！", e);
         }
     }
 
@@ -86,8 +86,7 @@ public class WebSocket {
      */
     @OnError
     public void onError(Session session, Throwable throwable) {
-        System.out.println("发生错误！");
-        throwable.printStackTrace();
+        log.error(session + "：该session报错！", throwable);
     }
 
     /**
@@ -109,7 +108,7 @@ public class WebSocket {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("发送消息报错！", e);
         }
     }
 }

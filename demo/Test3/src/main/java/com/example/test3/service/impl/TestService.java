@@ -9,6 +9,7 @@ import com.example.commons.tool.Result;
 import com.example.test3.dao.TestDao;
 import com.example.test3.service.ITestService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@Slf4j
 @Service
 @Transactional(readOnly = false, rollbackFor = Exception.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -79,6 +81,7 @@ public class TestService implements ITestService {
                 return new Result<String>().success(fileName + formatDate + "." + fileSuffix);
             } catch (Exception e) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                log.error("上传文件报错！", e);
                 return new Result<String>().fail("try catch!" + e);
             }
         }
@@ -108,6 +111,7 @@ public class TestService implements ITestService {
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("新增文件表数据报错！", e);
             return new Result<String>().fail("try catch!" + e);
         }
         return new Result<String>().fail("保存失败!");
@@ -132,6 +136,7 @@ public class TestService implements ITestService {
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("编辑文件表数据报错！", e);
             return new Result<String>().fail("try catch!" + e);
         }
         return new Result<String>().fail("编辑失败!");
@@ -181,6 +186,7 @@ public class TestService implements ITestService {
             }
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("批量删除文件表数据报错！", e);
             return new Result<String>().fail("try catch!" + e);
         }
         return new Result<String>().success("删除成功！");

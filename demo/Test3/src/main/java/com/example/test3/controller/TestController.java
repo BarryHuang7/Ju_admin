@@ -25,7 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.ParseException;
 import java.util.*;
 
-@Slf4j
+// 日志
+// @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("h")
@@ -107,10 +108,17 @@ public class TestController {
         return iTestService.deleteFileListData(FileFileDeleteDTO);
     }
 
+    /**
+     * 发送
+     * @param loginInfoVO
+     */
     @PostMapping("/sendTimingMessage")
-    public void sendTimingMessage() {
-        log.info("发送消息");
-        log.error("发送错误消息");
-        redisUtils.set(Constants.REDIS_WEBSOCKET_PREFIX + "2", "", 5);
+    public void sendTimingMessage(@RequestBody LoginInfoVO loginInfoVO) {
+        if (loginInfoVO != null && loginInfoVO.getId() != null) {
+            String key = Constants.REDIS_WEBSOCKET_PREFIX + loginInfoVO.getId();
+            if (!redisUtils.hasKey(key)) {
+                redisUtils.set(key, "", 5);
+            }
+        }
     }
 }

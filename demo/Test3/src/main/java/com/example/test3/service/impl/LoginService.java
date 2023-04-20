@@ -11,6 +11,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
 import java.util.*;
 
+@Slf4j
 @Service
 @Transactional(readOnly = false, rollbackFor = Exception.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -114,7 +116,7 @@ public class LoginService implements ILoginService {
                 response.getOutputStream().flush();
             }
         } catch (Exception e) {
-            System.out.println("try catch!" + e);
+            log.error("获取登录验证码报错！", e);
         }
     }
 
