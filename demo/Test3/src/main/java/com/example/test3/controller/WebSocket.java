@@ -1,5 +1,7 @@
 package com.example.test3.controller;
 
+import com.example.commons.entity.LoginInfoVO;
+import com.example.commons.entity.UserSendMessage;
 import com.example.commons.tool.Result;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +11,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,11 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Data
 @Slf4j
-@ServerEndpoint(value = "/websocket/{userId}")
+@ServerEndpoint(value = "/websocket/{userId}/{userName}")
 public class WebSocket {
 
     // 每次连接都是一个新的会话对象，线程安全的
-    String userId;
+    private String userId;
+    private String userName;
     // 与某个客户端的连接会话，通过此会话对象给客户端发送数据
     private Session session;
 
@@ -42,12 +46,13 @@ public class WebSocket {
      * @param config
      */
     @OnOpen
-    public void onOpen(@PathParam("userId") String userId, Session session, EndpointConfig config) {
+    public void onOpen(@PathParam("userId") String userId, @PathParam("userName") String userName, Session session, EndpointConfig config) {
         this.userId = userId;
+        this.userName = userName;
         this.session = session;
         webSocketsBeanMap.put(this.userId, this);
 
-        log.info(this.userId + "建立了连接，当前连接人数：" + webSocketsBeanMap.size() + "人。");
+        log.info(this.userName + "建立了连接，当前连接人数：" + webSocketsBeanMap.size() + "人。");
     }
 
 
@@ -57,7 +62,7 @@ public class WebSocket {
     @OnClose
     public void onClose() {
         webSocketsBeanMap.remove(this.userId);
-        log.info(this.userId + "断开了连接");
+        log.info(this.userName + "断开了连接");
     }
 
 
@@ -110,5 +115,27 @@ public class WebSocket {
         } catch (IOException e) {
             log.error("发送消息报错！", e);
         }
+    }
+
+    /**
+     * 获取所有在线人信息
+     */
+    public ArrayList<UserSendMessage> getAllOnlineUser(String sendUserId) {
+        ArrayList<UserSendMessage> list = new ArrayList<>();
+        for (Map.Entry<String, WebSocket> item : webSocketsBeanMap.entrySet()) {
+            String key = item.getKey();
+            WebSocket value = item.getValue();
+
+            // 排除自己
+            if (!key.equals(sendUserId)) {
+                UserSendMessage user = new UserSendMessage();
+
+                user.setUserId(key);
+                user.setUserName(value.getUserName());
+
+                list.add(user);
+            }
+        }
+        return list;
     }
 }

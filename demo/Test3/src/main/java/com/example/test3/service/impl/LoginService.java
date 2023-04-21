@@ -183,20 +183,27 @@ public class LoginService implements ILoginService {
     }
 
     /**
-     * 获取当前登陆者的用户信息
+     * 获取当前登陆者的用户id
      */
-    public LoginInfoVO getUserInfo() {
-        LoginInfoVO loginInfo = new LoginInfoVO();
+    public String getUserId() {
+        String userId = "0";
 
         String token = this.getHeaderToken();
 
         if (!token.equals("")) {
             Object id = redisUtils.get(token);
             if (id != null) {
-                loginInfo = loginDao.findUserById(Integer.parseInt(id.toString()));
+                userId = id.toString();
             }
         }
 
-        return loginInfo;
+        return userId;
+    }
+
+    /**
+     * 获取当前登陆者的用户信息
+     */
+    public LoginInfoVO getUserInfo() {
+        return loginDao.findUserById(Integer.parseInt(this.getUserId()));
     }
 }

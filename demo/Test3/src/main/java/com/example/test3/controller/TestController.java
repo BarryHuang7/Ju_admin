@@ -1,9 +1,7 @@
 package com.example.test3.controller;
 
-import com.example.commons.entity.FileFileDeleteDTO;
-import com.example.commons.entity.FileList;
-import com.example.commons.entity.LoginInfoVO;
-import com.example.commons.entity.Student;
+import com.example.commons.entity.*;
+import com.example.commons.groups.Groups;
 import com.example.commons.groups.Insert;
 import com.example.commons.groups.Update;
 import com.example.commons.tool.Constants;
@@ -39,6 +37,7 @@ public class TestController {
 
     private final ITestService iTestService;
     private final LoginService loginService;
+    private final WebSocket webSocket;
 
     private final RedisUtils redisUtils;
 
@@ -109,16 +108,40 @@ public class TestController {
     }
 
     /**
-     * 发送
-     * @param loginInfoVO
+     * 发送定时消息
      */
     @PostMapping("/sendTimingMessage")
-    public void sendTimingMessage(@RequestBody LoginInfoVO loginInfoVO) {
-        if (loginInfoVO != null && loginInfoVO.getId() != null) {
-            String key = Constants.REDIS_WEBSOCKET_PREFIX + loginInfoVO.getId();
-            if (!redisUtils.hasKey(key)) {
-                redisUtils.set(key, "", 5);
-            }
+    public void sendTimingMessage() {
+        String userId = loginService.getUserId();
+        String key = Constants.REDIS_WEBSOCKET_PREFIX + userId;
+        if (!redisUtils.hasKey(key)) {
+            redisUtils.set(key, "", 5);
         }
+    }
+
+    /**
+     * 获取所有在线人信息
+     */
+    @GetMapping("/getAllOnlineUser")
+    public ArrayList<UserSendMessage> getAllOnlineUser() {
+        String userId = loginService.getUserId();
+        return webSocket.getAllOnlineUser(userId);
+    }
+
+    /**
+     * 发送消息
+     * @param user
+     */
+    @PostMapping("/sendMessage")
+    public Result<String> sendMessage(@RequestBody @Validated({Groups.A.class}) UserSendMessage user) {
+        String data = "{\"userId\":\"" + user.getUserId()
+                + "\",\"userName\":\"" + user.getUserName()
+                + "\",\"sendUserId\":\"" + user.getSendUserId()
+                + "\",\"sendUserName\":\"" + user.getSendUserName()
+                + "\",\"message\":\"" + user.getMessage()
+                + "\"}";
+        String msg = "{\"code\":200,\"data\":" + data + "}";
+        webSocket.sendMessage(user.getUserId(), msg);
+        return new Result<String>().success("发送成功！");
     }
 }
