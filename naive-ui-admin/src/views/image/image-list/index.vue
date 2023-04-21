@@ -12,7 +12,7 @@
   const dataInfo = reactive({
     total: 0,
     pageNo: 1,
-    pageSize: 10,
+    pageSize: 5,
   });
   // 表格类型
   type listType = {
@@ -392,7 +392,7 @@
         v-model:page-size="dataInfo.pageSize"
         :item-count="dataInfo.total"
         show-size-picker
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="[5, 10, 20]"
         @update:page="changePage"
         @update:page-size="changePageSize"
       >
