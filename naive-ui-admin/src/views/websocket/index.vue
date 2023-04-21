@@ -9,7 +9,7 @@
     </div>
 
     <div mt-10>
-      <n-button type="primary" @click="getAllOnlineUser">获取所以在线用户</n-button>
+      <n-button type="primary" @click="getAllOnlineUser">获取所有在线用户</n-button>
 
       <div v-if="onlineUserList.length > 0" flex items-center mt-10 p-10 bg-white>
         <n-space>
