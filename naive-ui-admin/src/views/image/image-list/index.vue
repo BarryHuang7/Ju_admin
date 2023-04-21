@@ -8,6 +8,8 @@
   const token = userStore.getToken;
   // 列表数据
   const loadDataTable = ref<listType[]>([]);
+  // 列表的加载
+  const tableLoading = ref(true);
   // 页码相关
   const dataInfo = reactive({
     total: 0,
@@ -73,7 +75,12 @@
       key: 'fileUrl',
       width: 100,
       render(row: listType) {
-        return h(NImage, { width: 80, src: `${row.fileUrl}` });
+        return h(NImage, {
+          width: 80,
+          src: `${row.fileUrl}`,
+          lazy: true,
+          intersectionObserverOptions: { root: '.n-layout-content' },
+        });
       },
     },
     {
@@ -134,10 +141,14 @@
         fileName: searchInfo.fileName,
       },
     };
-    await getFileList(params).then((res) => {
-      loadDataTable.value = res.data.list || [];
-      dataInfo.total = res.data.total;
-    });
+    await getFileList(params)
+      .then((res) => {
+        loadDataTable.value = res.data.list || [];
+        dataInfo.total = res.data.total;
+      })
+      .finally(() => {
+        tableLoading.value = false;
+      });
   };
 
   // 切换页码
@@ -384,9 +395,10 @@
       </n-grid>
     </div>
 
-    <n-data-table :columns="columns" :data="loadDataTable" />
+    <n-data-table :columns="columns" :data="loadDataTable" :loading="tableLoading" />
 
-    <p mt-8 flex justify-end>
+    <p>共 {{ dataInfo.total }} 条数据, 共 {{ Math.ceil(dataInfo.total / dataInfo.pageSize) }} 页</p>
+    <p mt-10 overflow-auto>
       <n-pagination
         v-model:page="dataInfo.pageNo"
         v-model:page-size="dataInfo.pageSize"
@@ -395,11 +407,7 @@
         :page-sizes="[5, 10, 20]"
         @update:page="changePage"
         @update:page-size="changePageSize"
-      >
-        <template #prefix="{ pageCount }">
-          共 {{ dataInfo.total }} 条数据, 共 {{ pageCount }} 页
-        </template>
-      </n-pagination>
+      />
     </p>
 
     <n-modal v-model:show="showModal">
