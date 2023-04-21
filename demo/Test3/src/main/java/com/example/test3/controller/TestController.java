@@ -123,9 +123,9 @@ public class TestController {
      * 获取所有在线人信息
      */
     @GetMapping("/getAllOnlineUser")
-    public ArrayList<UserSendMessage> getAllOnlineUser() {
+    public Result<ArrayList<UserSendMessage>> getAllOnlineUser() {
         String userId = loginService.getUserId();
-        return webSocket.getAllOnlineUser(userId);
+        return new Result<ArrayList<UserSendMessage>>().success(webSocket.getAllOnlineUser(userId));
     }
 
     /**

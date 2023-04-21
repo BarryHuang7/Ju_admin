@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios';
-import { httpTwo } from '@/utils/http/axios';
+// import { httpTwo } from '@/utils/http/axios';
 
 //获取table
 export function getTableList(params) {
@@ -18,6 +18,6 @@ export function getFileList(params) {
   });
 }
 
-export function toHttp(url, method, params) {
+export function toHttp(url, method, params = {}) {
   return http.request({ url, method, params });
 }
