@@ -11,6 +11,7 @@ import com.example.test3.service.ITestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -198,5 +199,13 @@ public class TestService implements ITestService {
     public int getGuestFileNumber() {
         GuestFileNumberVO guestFileNumber = testDao.getGuestFileNumber();
         return guestFileNumber.getNumber();
+    }
+
+    @Async("taskExecutor")
+    @Override
+    public void async() {
+        // 异步任务如果用this调用，spring就会找不到代理类而是this那个类本身
+        System.out.println("async() = " + Thread.currentThread().getName());
+        System.out.println("异步！！！");
     }
 }

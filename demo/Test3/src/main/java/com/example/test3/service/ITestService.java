@@ -15,4 +15,6 @@ public interface ITestService {
     Result<String> updateFileListData(FileList fileList);
 
     Result<String> deleteFileListData(FileFileDeleteDTO fileFileDeleteDTO);
+
+    void async();
 }

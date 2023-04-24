@@ -13,7 +13,7 @@ import com.example.test3.service.impl.LoginService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -54,6 +54,12 @@ public class TestController {
     @PostMapping("/hello")
     public String hello() {
         return "你好！";
+    }
+
+    @PostMapping("/runAsync")
+    public void runAsync() {
+        iTestService.async();
+        System.out.println("测试！");
     }
 
     @PostMapping("/setRedis")
