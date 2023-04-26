@@ -5,6 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import java.util.TimeZone;
 //import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -19,6 +21,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class Test3Application {
 
     public static void main(String[] args) {
+        // 设置时区
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
         SpringApplication.run(Test3Application.class, args);
     }
 
