@@ -47,7 +47,8 @@
     "vfonts": "^0.0.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
-    "vue-types": "^4.2.1"
+    "vue-types": "^4.2.1",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.2.0",
