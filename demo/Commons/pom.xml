@@ -7,6 +7,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>Commons</name>
     <description>Commons</description>
+    <!--  要右键添加到maven项目中，才能找到该依赖  -->
 
     <properties>
         <java.version>1.8</java.version>
