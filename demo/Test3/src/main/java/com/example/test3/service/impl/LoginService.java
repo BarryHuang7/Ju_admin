@@ -1,6 +1,7 @@
 package com.example.test3.service.impl;
 
 import com.example.commons.entity.LoginDTO;
+import com.example.commons.entity.LoginInfo;
 import com.example.commons.entity.LoginInfoVO;
 import com.example.commons.entity.VerifyCode;
 import com.example.commons.tool.*;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +68,8 @@ public class LoginService implements ILoginService {
             LoginInfoVO loginInfo = loginDao.verification(loginDTO);
 
             if (loginInfo != null) {
+                // 登录记录
+                this.saveVisitorInfo(request, loginInfo.getId(), loginInfo.getName());
                 // token
                 String token = this.getToken(loginInfo);
                 loginInfo.setToken(token);
@@ -205,5 +209,30 @@ public class LoginService implements ILoginService {
      */
     public LoginInfoVO getUserInfo() {
         return loginDao.findUserById(Integer.parseInt(this.getUserId()));
+    }
+
+    /**
+     * 保存访客信息
+     */
+    public boolean saveVisitorInfo(HttpServletRequest request, int userId, String userName) {
+        boolean flag = false;
+        try {
+            LoginInfo loginInfo = new LoginInfo();
+            Date date = new Date();
+            String ip = IpUtil.getIpAddr(request);
+
+            loginInfo.setUserId(userId);
+            loginInfo.setUserName(userName);
+            loginInfo.setDate(date);
+            loginInfo.setIp(ip);
+
+            if(loginDao.insertVisitorInfo(loginInfo) == 1) {
+                flag = true;
+            }
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            log.error("新增访客表数据报错！", e);
+        }
+        return flag;
     }
 }

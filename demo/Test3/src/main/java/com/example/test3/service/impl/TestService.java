@@ -1,9 +1,6 @@
 package com.example.test3.service.impl;
 
-import com.example.commons.entity.FileFileDeleteDTO;
-import com.example.commons.entity.FileList;
-import com.example.commons.entity.GuestFileNumberVO;
-import com.example.commons.entity.LoginInfoVO;
+import com.example.commons.entity.*;
 import com.example.commons.tool.Constants;
 import com.example.commons.tool.Result;
 import com.example.test3.dao.TestDao;
@@ -30,7 +27,8 @@ public class TestService implements ITestService {
     private final LoginService loginService;
     private final TestDao testDao;
     // 格式化时间
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    private SimpleDateFormat sdf_datetime = new SimpleDateFormat("yyyyMMddHHmmss");
+    private SimpleDateFormat sdf_date = new SimpleDateFormat("yyyy-MM-dd");
     // 存放文件的路径
     private String filePath = "/home/file";
 
@@ -64,7 +62,7 @@ public class TestService implements ITestService {
                 String fileSuffix = originalFileName.substring(fileName.length() + 1);
                 // 时间前缀
                 Date date = new Date();
-                String formatDate = sdf.format(date);
+                String formatDate = sdf_datetime.format(date);
                 // 本地
                 // String systemDir = System.getProperty("user.dir");
                 // String filePath = systemDir + "\\home\\file";
@@ -207,5 +205,13 @@ public class TestService implements ITestService {
         // 异步任务如果用this调用，spring就会找不到代理类而是this那个类本身
         System.out.println("async() = " + Thread.currentThread().getName());
         System.out.println("异步！！！");
+    }
+
+    @Override
+    public Result<VisitorNumberVO> getVisitorNumber() {
+        Date date = new Date();
+        String formatDate = sdf_date.format(date);
+        VisitorNumberVO vn = testDao.getVisitorNumber(formatDate);
+        return new Result<VisitorNumberVO>().success(vn);
     }
 }

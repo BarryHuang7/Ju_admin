@@ -1,9 +1,6 @@
 package com.example.test3.dao;
 
-import com.example.commons.entity.FileFileDeleteDTO;
-import com.example.commons.entity.FileList;
-import com.example.commons.entity.GuestFileNumberVO;
-import com.example.commons.entity.Student;
+import com.example.commons.entity.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.ArrayList;
@@ -23,4 +20,6 @@ public interface TestDao {
     int deleteFileListData(@Param("list") ArrayList<Integer> fileIdList);
 
     GuestFileNumberVO getGuestFileNumber();
+
+    VisitorNumberVO getVisitorNumber(String date);
 }

@@ -1,6 +1,5 @@
 package com.example.test3.controller;
 
-import com.example.commons.entity.LoginInfoVO;
 import com.example.commons.entity.UserSendMessage;
 import com.example.commons.tool.Result;
 import lombok.Data;

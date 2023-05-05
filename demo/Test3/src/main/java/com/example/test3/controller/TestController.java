@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.*;
 
@@ -149,5 +150,13 @@ public class TestController {
         String msg = "{\"code\":200,\"data\":" + data + "}";
         webSocket.sendMessage(user.getUserId(), msg);
         return new Result<String>().success("发送成功！");
+    }
+
+    /**
+     * 获取今日访客数
+     */
+    @GetMapping("/getVisitorNumber")
+    public Result<VisitorNumberVO> getVisitorNumber() {
+        return iTestService.getVisitorNumber();
     }
 }

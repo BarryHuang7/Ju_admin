@@ -154,4 +154,18 @@
         from file_list
         where is_admin = 0
     </select>
+
+    <resultMap type="com.example.commons.entity.VisitorNumberVO" id="visitorNumberMap">
+        <result property="number" column="number" />
+    </resultMap>
+
+    <select id="getVisitorNumber" resultMap="visitorNumberMap">
+        select count(ip) as number
+        from (
+                 select ip
+                 from `login_info`
+                 where `date` = #{date}
+                 group by `ip`
+             ) t
+    </select>
 </mapper>

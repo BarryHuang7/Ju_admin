@@ -21,4 +21,36 @@
         from user
         where id = #{id}
     </select>
+
+    <insert id="insertVisitorInfo" parameterType="com.example.commons.entity.LoginInfo">
+        insert into `login_info`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="dto.userId != null">
+                `user_id`,
+            </if>
+            <if test="dto.userName != null">
+                `user_name`,
+            </if>
+            <if test="dto.date != null">
+                `date`,
+            </if>
+            <if test="dto.ip != null">
+                `ip`,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="dto.userId != null">
+                #{dto.userId},
+            </if>
+            <if test="dto.userName != null">
+                #{dto.userName},
+            </if>
+            <if test="dto.date != null">
+                #{dto.date},
+            </if>
+            <if test="dto.ip != null">
+                #{dto.ip},
+            </if>
+        </trim>
+    </insert>
 </mapper>
