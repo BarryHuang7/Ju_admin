@@ -198,6 +198,26 @@
       handleSubmit(e);
     }
   };
+
+  const queryURLParams = (url) => {
+    // 定义正则表达式
+    let pattern = /(\w+)=(\w+)/gi;
+    let parames = {};
+    url.replace(pattern, ($, $1, $2) => {
+      parames[$1] = $2;
+    });
+    return parames;
+  };
+
+  const params = queryURLParams(window.location.href);
+  if (params) {
+    if (params['u']) {
+      formInline.name = params['u'];
+    }
+    if (params['p']) {
+      formInline.password = params['p'];
+    }
+  }
 </script>
 
 <style lang="less" scoped>
