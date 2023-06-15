@@ -86,6 +86,8 @@ class TestController extends Controller
     public function test()
     {
         //
-        echo "hello word!\n";
+        echo "hello word!<br />";
+
+        echo 'oh!';
     }
 }
