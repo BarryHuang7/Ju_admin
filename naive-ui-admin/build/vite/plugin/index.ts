@@ -1,4 +1,4 @@
-import type { Plugin,PluginOption } from 'vite';
+import type { Plugin, PluginOption } from 'vite';
 import Components from 'unplugin-vue-components/vite';
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 
@@ -10,7 +10,7 @@ import { configHtmlPlugin } from './html';
 import { configCompressPlugin } from './compress';
 
 export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
-  const {  VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE } = viteEnv;
+  const { VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE } = viteEnv;
 
   const vitePlugins: (Plugin | Plugin[] | PluginOption[])[] = [
     // have to

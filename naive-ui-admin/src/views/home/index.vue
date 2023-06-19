@@ -9,12 +9,21 @@
       </span>
       <template #suffix>人</template>
     </n-statistic>
+
+    <div mt-20>
+      <p c-green>功能列表：</p>
+      <n-button type="info" @click="skip(1)">图片列表</n-button>
+      <n-button type="info" @click="skip(2)" ml-10>Java WebSocket</n-button>
+      <n-button type="info" @click="skip(3)" ml-10>Swoole WebSocket</n-button>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { toHttp } from '@/api/table/list';
+  import { useRouter } from 'vue-router';
+  const router = useRouter();
 
   const number = ref(0);
   let i = 0;
@@ -35,6 +44,20 @@
     await toHttp(url, type).then((res) => {
       number.value = res.data.number || 0;
     });
+  };
+
+  const skip = (type: number) => {
+    switch (type) {
+      case 1:
+        router.push('/image/image-list');
+        break;
+      case 2:
+        router.push('/websocket/websocket-index');
+        break;
+      case 3:
+        router.push('/swoole/swoole-websocket');
+        break;
+    }
   };
 
   getVisitorNumber();

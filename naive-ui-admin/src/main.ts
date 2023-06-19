@@ -5,9 +5,16 @@ import App from './App.vue';
 import router, { setupRouter } from './router';
 import { setupStore } from '@/store';
 import 'uno.css';
+// 弹幕
+// import { vueBaberrage } from 'vue-baberrage';
+import vue3Barrage from 'vue3-barrage';
 
 async function bootstrap() {
   const app = createApp(App);
+
+  // 挂载弹幕
+  // app.use(vueBaberrage);
+  app.use(vue3Barrage);
 
   // 挂载状态管理
   setupStore(app);
