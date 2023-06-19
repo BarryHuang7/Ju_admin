@@ -1,45 +1,53 @@
 <template>
-  <div>
-    <div bg-black mt-20 style="width: 500px; height: 300px; margin: 0 auto">
+  <div mt-20>
+    <div
+      bg-black
+      :style="{ width: `${barrageData.width}px` }"
+      style="height: 300px; margin: 0 auto"
+    >
       <vue3-barrage
         ref="barrage"
         :lanesCount="6"
-        :boxWidth="500"
+        :boxWidth="barrageData.width"
         :boxHeight="300"
-        :isShow="barrageData.barrageIsShow"
-        :list="barrageData.barrageList"
-        :loop="barrageData.barrageLoop"
+        :isShow="barrageData.isShow"
+        :list="barrageData.list"
+        :loop="barrageData.loop"
         :speed="barrageData.speed"
         attachId="barrage"
         :fontSize="barrageData.fontSize"
       >
         <!-- 自定义弹幕样式 -->
         <template #barrage="list">
-          <span style="color: #ffffff">{{ list.item.msg }}</span>
+          <span :style="{ color: list.item.color }">{{ list.item.msg }}</span>
         </template>
       </vue3-barrage>
     </div>
 
-    <div flex justify-center items-center mt-10>
-      <n-select
-        v-model:value="barrageData.position"
-        :options="barrageOptions"
-        style="width: 100px"
-      />
-      <n-space ml-10>
-        <n-switch v-model:value="barrageData.barrageIsShow">
-          <template #checked>弹幕关</template>
-          <template #unchecked>弹幕开</template>
-        </n-switch>
-      </n-space>
-      <n-input
-        v-model:value="message"
-        placeholder="请输入消息"
-        @keyup.enter="keyUp()"
-        style="width: 200px"
-        ml-10
-      />
-      <n-button type="primary" ml-10 @click="sendMessage()">发送弹幕</n-button>
+    <div mt-10>
+      <div flex justify-center items-center>
+        <span>弹幕样式：</span>
+        <n-select
+          v-model:value="barrageData.position"
+          :options="barrageOptions"
+          style="width: 100px"
+        />
+        <span ml-10>弹幕颜色：</span>
+        <n-color-picker v-model:value="barrageData.color" style="width: 100px" />
+      </div>
+      <div flex justify-center items-center mt-10>
+        <n-space>
+          <n-switch v-model:value="barrageData.isShow" />
+        </n-space>
+        <n-input
+          v-model:value="message"
+          placeholder="请输入弹幕"
+          @keyup.enter="keyUp()"
+          style="width: 200px"
+          ml-10
+        />
+        <n-button type="primary" ml-10 @click="sendMessage()">发送弹幕</n-button>
+      </div>
     </div>
   </div>
 </template>
@@ -63,6 +71,7 @@
   interface BarrageList {
     id: number;
     msg: string | undefined;
+    color: string;
     position: PositionStatus;
   }
 
@@ -70,18 +79,22 @@
 
   let barrageData = reactive({
     // 弹幕列表
-    barrageList: [] as Array<BarrageList>,
+    list: [] as Array<BarrageList>,
     // 弹幕位置
     position: 'normal',
     // 弹幕字体大小
-    fontSize: 12,
+    fontSize: 16,
     // 是否显示弹幕
-    barrageIsShow: true,
+    isShow: true,
     currentId: 0,
     // 是否循环显示
-    barrageLoop: false,
+    loop: false,
     // 弹幕速度
     speed: 5,
+    // 弹幕宽度
+    width: window.innerWidth >= 500 ? 500 : window.innerWidth - 20,
+    // 弹幕颜色
+    color: '#ffffff',
   });
 
   const ws = ref<WebSocket>();
@@ -91,9 +104,10 @@
   ws.value.onmessage = (msg) => {
     const data = JSON.parse(msg.data);
 
-    barrageData.barrageList.push({
+    barrageData.list.push({
       id: ++data.currentId,
       msg: `${data.name}说：${data.msg}`,
+      color: data.color,
       position: barrageData.position as PositionStatus,
     });
   };
@@ -103,6 +117,7 @@
       const msg_json = {
         name: userInfo['name'],
         msg: message.value,
+        color: barrageData.color,
       };
 
       if (ws.value) {
