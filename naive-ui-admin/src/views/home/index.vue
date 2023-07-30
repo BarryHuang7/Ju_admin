@@ -12,9 +12,9 @@
 
     <div mt-20>
       <p c-green>功能列表：</p>
-      <n-button type="info" @click="skip(1)">图片列表</n-button>
-      <n-button type="info" @click="skip(2)" ml-10>Java WebSocket</n-button>
-      <n-button type="info" @click="skip(3)" ml-10>Swoole WebSocket</n-button>
+      <n-button type="info" @click="skip(1)" mt-10>图片列表</n-button>
+      <n-button type="info" @click="skip(2)" mt-10 ml-10>Java WebSocket</n-button>
+      <n-button type="info" @click="skip(3)" mt-10 ml-10>Swoole WebSocket</n-button>
     </div>
   </div>
 </template>
