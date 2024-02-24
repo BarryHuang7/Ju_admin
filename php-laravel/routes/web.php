@@ -16,4 +16,4 @@
 // });
 
 Route::get('test/test/t', 'Test\TestController@test');
-// Route::resource('test/test', 'Test\TestController');
+Route::resource('test/test', 'Test\TestController');
