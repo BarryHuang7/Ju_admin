@@ -347,8 +347,8 @@
 <template>
   <div min-w-340 bg-white p-15>
     <div mt-10 mb-10>
-      <n-grid item-responsive mb-8 x-gap="12" y-gap="12">
-        <n-gi span="8">
+      <n-grid item-responsive responsive="screen" cols="24" mb-8 x-gap="12" y-gap="12">
+        <n-gi span="12 m:8 l:8">
           <div flex justify-between items-center>
             <span>标题：</span>
             <n-input
@@ -360,7 +360,7 @@
             />
           </div>
         </n-gi>
-        <n-gi span="8">
+        <n-gi span="12 m:8 l:8">
           <div flex justify-between items-center>
             <span>内容：</span>
             <n-input
@@ -372,7 +372,7 @@
             />
           </div>
         </n-gi>
-        <n-gi span="8">
+        <n-gi span="12 m:8 l:8">
           <div flex justify-between items-center>
             <span>图片名：</span>
             <n-input
