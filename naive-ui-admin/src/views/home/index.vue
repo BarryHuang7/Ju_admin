@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div @click="test()" text-center cursor-pointer title="你点我试试？">首页啥都没有呢！</div>
+    <div flex justify-center items-center>
+      <div @click="test()" inline-block text-center cursor-pointer title="你点我试试？">
+        首页啥都没有呢！
+      </div>
+    </div>
 
     <n-statistic tabular-nums mt-10>
       <span>今日访客量：</span>
