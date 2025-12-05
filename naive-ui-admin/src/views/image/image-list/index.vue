@@ -51,7 +51,7 @@
   // 图片信息
   const imgsList = ref<UploadFileInfo[]>([]);
   // 域名地址
-  const domainAddress = 'http://175.178.236.223';
+  const domainAddress = 'http:///110.41.16.194';
 
   // 表格字段
   const columns: DataTableColumns<listType> = [
@@ -464,7 +464,7 @@
           <span class="modalTitle">上传图片：</span>
           <span inline-block style="width: 45%">
             <n-upload
-              :action="`${domainAddress}:8001/api/h/uploadFile`"
+              :action="`${domainAddress}:8080/api/h/uploadFile`"
               :headers="{
                 Authorization: `Bearer ${token}`,
               }"

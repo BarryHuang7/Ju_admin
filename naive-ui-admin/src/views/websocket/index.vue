@@ -53,7 +53,7 @@
   const linkServer = () => {
     if (userInfo) {
       ws.value = new WebSocket(
-        `ws://175.178.236.223:8001/api/websocket/${userInfo['id']}/${userInfo['name']}`
+        `ws://110.41.16.194:8080/api/websocket/${userInfo['id']}/${userInfo['name']}`
       );
 
       ws.value.onopen = () => {
@@ -101,6 +101,7 @@
       if (!selectUserId.value) {
         if (type === 1 && message.value) {
           ws.value.send(message.value);
+          message.value = '';
         } else if (type === 2) {
           window['$message'].info('正在发送消息...服务器会在5秒后回复你');
           sendTimingMessage();
@@ -150,6 +151,7 @@
       };
 
       await toHttp(url, type, params);
+      message.value = '';
     }
   };
 

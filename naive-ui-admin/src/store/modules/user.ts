@@ -38,7 +38,7 @@ export const useUserStore = defineStore({
     getPermissions(): [any][] {
       return this.permissions;
     },
-    getUserInfo(): object {
+    getUserInfo(): any {
       return this.info;
     },
   },

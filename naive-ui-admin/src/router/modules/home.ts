@@ -34,14 +34,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('@/views/home/index.vue'),
       },
-      {
-        path: 'loading',
-        name: 'loading',
-        meta: {
-          title: 'loading',
-        },
-        component: () => import('@/views/iframe/index.vue'),
-      },
+      // {
+      //   path: 'loading',
+      //   name: 'loading',
+      //   meta: {
+      //     title: 'loading',
+      //   },
+      //   component: () => import('@/views/iframe/index.vue'),
+      // },
     ],
   },
 ];

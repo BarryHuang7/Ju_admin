@@ -35,14 +35,19 @@
 
 <script lang="ts" setup>
   import { ref, reactive } from 'vue';
+  import { useUserStore } from '@/store/modules/user';
 
+  const userStore = useUserStore();
+  const isAdmin = userStore.getUserInfo.isAdmin;
   let prize_draw_set_timeout: NodeJS.Timer | null = null;
   const number_of_draws = ref(1);
 
-  const prize_list = reactive([
-    '1314现金', '再来一次', '1块钱', '手办+520红包', '我一个深深地吻',
-    'iQOO手表', '一个我可以实现的愿望', '带你去买衣服，由黄公子买单', '再来一次', '200红包+年底换iQOO13 pro'
-  ]);
+  const prize_list = reactive(
+    isAdmin ? [
+      '1314现金', '再来一次', '1块钱', '手办+520红包', '我一个深深地吻',
+      'iQOO手表', '一个我可以实现的愿望', '带你去买衣服，由黄公子买单', '再来一次', '200红包+年底换iQOO13 pro'
+    ] : ['1000现金', '再来一次', '1块钱', '无', '空气', '手表', '愿望', '衣服', '再来一次', '200红包']
+  );
   const action = ref(0);
   const prize = ref('');
   const modal = ref(false);

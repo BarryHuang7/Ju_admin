@@ -14,13 +14,13 @@ spring:
     name: demo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://175.178.236.223:3306/java_test?serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://127.0.0.1:3306/java_test?useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: 151417mysql
+    password: aced0f8e04167979
 # redis
   redis:
     database: 0
-    host: 175.178.236.223
+    host: 110.41.16.194
     port: 6379
     timeout: 3000
     password: 151417redis
@@ -44,7 +44,7 @@ mybatis:
 eureka:
   instance:
     prefer-ip-address: true
-    ip-address: 175.178.236.223
+    ip-address: 110.41.16.194
     port: 9999
   client:
     serviceUrl:
