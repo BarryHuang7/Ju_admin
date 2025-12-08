@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { LinkOutlined } from '@vicons/antd';
+import { MessageOutlined } from '@vicons/antd';
 import { renderIcon } from '@/utils/index';
 
 /**
@@ -22,7 +22,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Layout,
     meta: {
       title: 'Swoole',
-      icon: renderIcon(LinkOutlined),
+      icon: renderIcon(MessageOutlined),
       sort: 4,
     },
     children: [

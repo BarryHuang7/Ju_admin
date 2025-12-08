@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { GiftOutlined } from '@vicons/antd';
+import { MailOutlined } from '@vicons/antd';
 import { renderIcon } from '@/utils/index';
 
 /**
@@ -16,23 +16,23 @@ import { renderIcon } from '@/utils/index';
  * */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/prize',
-    name: 'Prize',
-    redirect: '/prize/prize-index',
+    path: '/email',
+    name: 'Email',
+    redirect: '/email/index',
     component: Layout,
     meta: {
-      title: '抽奖',
-      icon: renderIcon(GiftOutlined),
-      sort: 3,
+      title: '发送邮箱',
+      icon: renderIcon(MailOutlined),
+      sort: 5,
     },
     children: [
       {
-        path: 'prize-index',
-        name: 'prize-index',
+        path: 'index',
+        name: 'Email',
         meta: {
-          title: '抽奖',
+          title: '发送邮箱',
         },
-        component: () => import('@/views/prize/index.vue'),
+        component: () => import('@/views/email/index.vue'),
       },
     ],
   },

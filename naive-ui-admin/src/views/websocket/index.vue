@@ -1,5 +1,17 @@
 <template>
   <div mt-20>
+    <n-space vertical :size="12" mb-20>
+      <n-alert title="功能说明" type="info">
+        <span>首先点击</span>
+        <span class="high-light" cursor-pointer>连接服务器</span>
+        <span>按钮，然后点击</span>
+        <span class="high-light" cursor-pointer>获取所有在线用户</span>
+        <span>按钮，点击对应的</span>
+        <span class="high-light" cursor-pointer>用户</span>
+        <span>，即可给对方发送消息。</span>
+      </n-alert>
+    </n-space>
+
     <n-button type="primary" @click="linkServer">连接服务器</n-button>
     <n-button type="primary" ml-10 @click="sendMessage(2)">接收服务器消息</n-button>
 
@@ -180,3 +192,15 @@
     }
   };
 </script>
+
+<style>
+  .high-light {
+    padding: 0 6px;
+    margin: 0 2px;
+    border-radius: 3px;
+    display: inline-block;
+    color: #000;
+    background: rgb(99, 226, 183);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>

@@ -1,5 +1,15 @@
 <template>
   <div mt-20>
+    <n-space vertical :size="12" mb-20>
+      <n-alert title="功能说明" type="info">
+        <span>进页面就会</span>
+        <span class="high-light">连接服务器</span>
+        <span>，</span>
+        <span class="high-light">在线用户</span>
+        <span>可实时看到对方发送的弹幕（模拟直播弹幕）。</span>
+      </n-alert>
+    </n-space>
+
     <div
       bg-black
       :style="{ width: `${barrageData.width}px` }"

@@ -19,6 +19,7 @@
       <n-button type="info" @click="skip(1)" mt-10>图片列表</n-button>
       <n-button type="info" @click="skip(2)" mt-10 ml-10>Java WebSocket</n-button>
       <n-button type="info" @click="skip(3)" mt-10 ml-10>Swoole WebSocket</n-button>
+      <n-button type="info" @click="skip(4)" mt-10 ml-10>发送邮箱</n-button>
     </div>
   </div>
 </template>
@@ -60,6 +61,9 @@
         break;
       case 3:
         router.push('/swoole/swoole-websocket');
+        break;
+      case 4:
+        router.push('/email/index');
         break;
     }
   };
