@@ -21,7 +21,7 @@ class CreateLoginInfoTable extends Migration
             $table->integer('user_id')->nullable();
             $table->string('user_name')->nullable();
             $table->string('ip')->nullable();
-            $table->dateTime('date')->nullable();
+            $table->date('date')->nullable();
             $table->timestamp('created_at')->useCurrent();
         });
     }

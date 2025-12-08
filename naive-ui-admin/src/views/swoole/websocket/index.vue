@@ -142,3 +142,15 @@
     sendMessage();
   };
 </script>
+
+<style>
+  .high-light {
+    padding: 0 6px;
+    margin: 0 2px;
+    border-radius: 3px;
+    display: inline-block;
+    color: #000;
+    background: rgb(99, 226, 183);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>

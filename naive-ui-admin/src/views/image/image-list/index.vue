@@ -472,8 +472,8 @@
               list-type="image-card"
               :max="1"
               @before-upload="beforeMaterialUpload"
-              @update:file-list="(e:any) => imgsList = e"
-              @finish="(e:any) => handleFinish(e)"
+              @update:file-list="(e) => (imgsList = e)"
+              @finish="(e) => handleFinish(e)"
               @remove="handleRemove()"
             />
           </span>

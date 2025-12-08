@@ -51,6 +51,7 @@ export interface GlobConfig {
   apiUrl: string;
   shortName: string;
   urlPrefix?: string;
+  phpUrlPrefix?: string;
   uploadUrl?: string;
   prodMock: boolean;
   imgUrl?: string;
@@ -61,8 +62,10 @@ export interface GlobEnvConfig {
   VITE_GLOB_APP_TITLE: string;
   // 接口地址
   VITE_GLOB_API_URL: string;
-  // 接口前缀
+  // java 接口前缀
   VITE_GLOB_API_URL_PREFIX?: string;
+  // php 接口前缀
+  VITE_GLOB_PHP_API_URL_PREFIX?: string;
   // Project abbreviation
   VITE_GLOB_APP_SHORT_NAME: string;
   // 图片上传地址

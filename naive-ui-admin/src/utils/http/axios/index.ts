@@ -19,6 +19,7 @@ import { useUserStoreWidthOut } from '@/store/modules/user';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix || '';
+const phpUrlPrefix = globSetting.phpUrlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
@@ -289,12 +290,11 @@ export const http = createAxios();
 // import { httpTwo } from '@/utils/http/axios'
 export const httpTwo = createAxios({
   requestOptions: {
-    // apiUrl: 'http://192.158.1.188:9003',
-    // urlPrefix: '/api',
-    // urlPrefix: '',
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: phpUrlPrefix,
     withToken: false,
     isReturnNativeResponse: true,
     isTransformResponse: false,
   },
-  responseType: 'blob',
+  // responseType: 'blob',
 });

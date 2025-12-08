@@ -17,7 +17,7 @@ import { renderIcon } from '@/utils/index';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/email',
-    name: 'Email',
+    name: 'email',
     redirect: '/email/index',
     component: Layout,
     meta: {
@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'index',
-        name: 'Email',
+        name: 'email-index',
         meta: {
           title: '发送邮箱',
         },

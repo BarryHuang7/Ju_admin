@@ -17,11 +17,11 @@ use App\Http\Controllers\Email\SendEmailController;
 //     return view('welcome');
 // });
 
-Route::get('/get-csrf-token', function() {
-  return response()->json([
-    'csrf_token' => csrf_token()
-  ]);
-});
+// Route::get('/get-csrf-token', function() {
+//   return response()->json([
+//     'csrf_token' => csrf_token()
+//   ]);
+// });
 
 Route::get('runTest', [SendEmailController::class, 'runTest']);
 Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);

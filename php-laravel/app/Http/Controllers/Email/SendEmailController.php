@@ -11,6 +11,7 @@ use App\Jobs\SendEmail;
 // use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class SendEmailController extends Controller
 {
@@ -22,6 +23,9 @@ class SendEmailController extends Controller
     public function index()
     {
         dd('index');
+        // $jobId = "jobId_" . Str::random(32) . request()->session()->get('_token');
+        // Redis::setex($jobId, 300, 'true');
+        // $flag = Redis::get($jobId);
     }
 
     /**
@@ -109,41 +113,70 @@ class SendEmailController extends Controller
     /**
      * 队列发送邮箱
      */
-    public function sendEmail() {
-        $post = request()->post();
+    public function sendEmail(Request $request) {
+        $data = $request->input();
+        $emails = isset($data['emails']) && !empty($data['emails']) ? $data['emails'] : [];
 
-        if (count($post) > 0) {
-            Log::info('发送邮件请求' . json_encode($post));
-            SendEmail::dispatch($post);
+        if ($emails && is_array($emails) && count($emails) > 0) {
+            if (count($emails) > 5) {
+                return response()->json([
+                    'code' => 400,
+                    'msg' => '最大发送5个邮箱！'
+                ]);
+            }
+
+            $rules = array();
+            foreach ($emails as $index => $email) {
+                $rules["emails.{$index}"] = 'required|email:rfc,dns,filter';
+            }
+
+            $validator = Validator::make(['emails' => $emails], $rules);
+
+            if (!$validator->fails()) {
+                Log::info('发送邮箱请求' . json_encode($data));
+
+                foreach ($emails as $e) {
+                    $email = trim($e);
+                    Log::info('正在发送邮箱【' . $email . '】');
+                    
+                    SendEmail::dispatch($email);
+                }
+
+                return response()->json([
+                    'code' => 200,
+                    'msg' => '已成功加入队列'
+                ]);
+            } else {
+                return response()->json([
+                    'code' => 400,
+                    'msg' => '邮箱验证不通过！'
+                ]);
+            }
         }
 
-        // $jobId = "jobId_" . Str::random(32) . request()->session()->get('_token');
-        // Redis::setex($jobId, 300, 'true');
-        // $flag = Redis::get($jobId);
-
         return response()->json([
-            'code' => 200,
-            'msg' => '已成功加入队列'
+            'code' => 400,
+            'msg' => ''
         ]);
     }
 
     /**
      * 处理发送邮箱逻辑
      */
-    public function handleSendEmail($jobId, $data) {
+    public function handleSendEmail($jobId, $email) {
         $flag = false;
-        Log::info('给【' . $data['email'] . '】发送邮件。');
+        Log::info('给【' . $email . '】发送邮箱。');
 
         try {
-            Mail::raw('你好！Guest!', function ($message) use ($data) {
-                $message->to($data['email'], 'Guest')
+            Mail::raw('你好！Guest!', function ($message) use ($email) {
+                $message->to($email, 'Guest')
                     ->subject('测试邮箱');
             });
             $flag = true;
         } catch (\Exception $e) {
-            Log::info('给【' . $data['email'] . '】发送邮件失败。错误信息：' . $e->getMessage());
+            Log::info('给【' . $email . '】发送邮箱失败。错误信息：' . $e->getMessage());
         }
 
-        Log::info('给【' . $data['email'] . '】发送邮件' . ($flag ? '成功' : '失败') . '。');
+        Log::info('给【' . $email . '】发送邮箱' . ($flag ? '成功' : '失败') . '。');
     }
 }
