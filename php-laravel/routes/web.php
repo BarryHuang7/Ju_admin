@@ -11,9 +11,18 @@
 |
 */
 
+use App\Http\Controllers\Email\SendEmailController;
+
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 
-Route::get('test/test/t', 'Test\TestController@test');
-Route::resource('test/test', 'Test\TestController');
+Route::get('/get-csrf-token', function() {
+  return response()->json([
+    'csrf_token' => csrf_token()
+  ]);
+});
+
+Route::get('runTest', [SendEmailController::class, 'runTest']);
+Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
+// Route::resource('email', 'Email\SendEmailController');

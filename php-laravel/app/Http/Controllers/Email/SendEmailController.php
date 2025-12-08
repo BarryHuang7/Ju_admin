@@ -1,13 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Test;
+namespace App\Http\Controllers\Email;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Xls;
+// use PhpOffice\PhpSpreadsheet\IOFactory;
+// use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use App\Jobs\SendEmail;
+// use Illuminate\Support\Facades\Redis;
+// use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
-class TestController extends Controller
+class SendEmailController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,6 +21,24 @@ class TestController extends Controller
      */
     public function index()
     {
+        dd('index');
+    }
+
+    /**
+     * 测试接口是否可用
+     */
+    public function runTest()
+    {
+        //
+        echo "hello word!<br />";
+
+        echo 'oh!';
+    }
+
+    /**
+     * 处理excel，复制多份数据并修改学生名称
+     */
+    public function handleExcel() {
         // 模板文件
         // $tplfile = 'C:/Users/Administrator/Desktop/a/a.xls';
         // $list = [
@@ -84,76 +107,43 @@ class TestController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 队列发送邮箱
      */
-    public function create()
-    {
-        //
+    public function sendEmail() {
+        $post = request()->post();
+
+        if (count($post) > 0) {
+            Log::info('发送邮件请求' . json_encode($post));
+            SendEmail::dispatch($post);
+        }
+
+        // $jobId = "jobId_" . Str::random(32) . request()->session()->get('_token');
+        // Redis::setex($jobId, 300, 'true');
+        // $flag = Redis::get($jobId);
+
+        return response()->json([
+            'code' => 200,
+            'msg' => '已成功加入队列'
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * 处理发送邮箱逻辑
      */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function handleSendEmail($jobId, $data) {
+        $flag = false;
+        Log::info('给【' . $data['email'] . '】发送邮件。');
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+        try {
+            Mail::raw('你好！Guest!', function ($message) use ($data) {
+                $message->to($data['email'], 'Guest')
+                    ->subject('测试邮箱');
+            });
+            $flag = true;
+        } catch (\Exception $e) {
+            Log::info('给【' . $data['email'] . '】发送邮件失败。错误信息：' . $e->getMessage());
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    public function test()
-    {
-        //
-        echo "hello word!<br />";
-
-        echo 'oh!';
+        Log::info('给【' . $data['email'] . '】发送邮件' . ($flag ? '成功' : '失败') . '。');
     }
 }
