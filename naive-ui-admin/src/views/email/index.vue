@@ -5,6 +5,10 @@
   const emails = ref('');
 
   const send = () => {
+    if (!emails.value) {
+      return window['$message'].error('请输入邮箱！');
+    }
+
     const newEmails = emails.value
       .trim()
       .replace(/;+$/, '')

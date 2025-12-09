@@ -24,7 +24,10 @@ class SendEmail implements ShouldQueue
     public function __construct($data)
     {
         /**
-         * php artisan queue:work --queue=emails
+         * 本地 php artisan queue:work --queue=emails
+         * 服务器 nohup php artisan queue:work --queue=emails > storage/logs/queue.log 2>&1 &
+         * 搜索进城 ps aux | grep "artisan queue:work --queue=emails"
+         * 杀死进城 kill -9 id
          */
 
         $this->data = $data;
