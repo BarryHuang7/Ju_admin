@@ -21,6 +21,7 @@
         <n-button type="info" @click="skip(2)" mt-20 md:mt-10 mr-10>Java WebSocket</n-button>
         <n-button type="info" @click="skip(3)" mt-20 md:mt-10 mr-10>Swoole WebSocket</n-button>
         <n-button type="info" @click="skip(4)" mt-20 md:mt-10 mr-10>发送邮箱</n-button>
+        <n-button type="info" @click="skip(5)" mt-20 md:mt-10 mr-10>千问chat</n-button>
       </div>
     </div>
   </div>
@@ -66,6 +67,9 @@
         break;
       case 4:
         router.push('/email/index');
+        break;
+      case 5:
+        router.push('/qwen/index');
         break;
     }
   };
