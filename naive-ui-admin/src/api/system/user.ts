@@ -1,4 +1,4 @@
-import { http, httpTwo } from '@/utils/http/axios';
+import { http, httpBlob } from '@/utils/http/axios';
 
 export interface BasicResponseModel<T = any> {
   data: T;
@@ -72,7 +72,7 @@ export function logout() {
  * @description: 获取登录验证码
  */
 export function getVerificationCode(headerVerifyCode) {
-  return httpTwo.request({
+  return httpBlob.request({
     url: '/login/getVerificationCode',
     method: 'GET',
     headers: {

@@ -298,3 +298,15 @@ export const httpTwo = createAxios({
   },
   // responseType: 'blob',
 });
+
+/**
+ * 用于获取图片验证码
+ */
+export const httpBlob = createAxios({
+  requestOptions: {
+    withToken: false,
+    isReturnNativeResponse: true,
+    isTransformResponse: false,
+  },
+  responseType: 'blob',
+});
