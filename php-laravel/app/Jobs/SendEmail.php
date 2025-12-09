@@ -15,13 +15,14 @@ class SendEmail implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $data;
+    protected $ip;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($data)
+    public function __construct($data, $ip)
     {
         /**
          * 本地 php artisan queue:work --queue=emails
@@ -31,6 +32,7 @@ class SendEmail implements ShouldQueue
          */
 
         $this->data = $data;
+        $this->ip = $ip;
 
         // 指定队列
         $this->onQueue('emails');
@@ -51,10 +53,11 @@ class SendEmail implements ShouldQueue
             $jobId = $this->job ? $this->job->getJobId() : null;
             Log::info("队列日志", [
                 'job_id' => $jobId,
-                'data' => $this->data
+                'data' => $this->data,
+                'ip' => $this->ip
             ]);
     
-            (new SendEmailController)->handleSendEmail($jobId, $this->data);
+            (new SendEmailController)->handleSendEmail($jobId, $this->data, $this->ip);
         } catch (\Exception $e) {
             $this->saveErrorLog($e->getMessage());
             throw $e;
@@ -72,7 +75,8 @@ class SendEmail implements ShouldQueue
         Log::error("队列失败日志", [
             'job_id' => $jobId,
             'error' => $error,
-            'email_data' => $this->data
+            'email_data' => $this->data,
+            'ip' => $this->ip
         ]);
     }
 }

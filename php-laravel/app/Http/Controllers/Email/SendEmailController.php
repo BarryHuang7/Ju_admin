@@ -116,6 +116,7 @@ class SendEmailController extends Controller
     public function sendEmail(Request $request) {
         $data = $request->input();
         $emails = isset($data['emails']) && !empty($data['emails']) ? $data['emails'] : [];
+        $ip = $this->getClientRealIp($request);
 
         if ($emails && is_array($emails) && count($emails) > 0) {
             if (count($emails) > 5) {
@@ -133,13 +134,13 @@ class SendEmailController extends Controller
             $validator = Validator::make(['emails' => $emails], $rules);
 
             if (!$validator->fails()) {
-                Log::info('发送邮箱请求' . json_encode($data));
+                Log::info('发送邮箱请求' . json_encode($data) . ', ip: ' . $ip);
 
                 foreach ($emails as $e) {
                     $email = trim($e);
                     Log::info('正在发送邮箱【' . $email . '】');
-                    
-                    SendEmail::dispatch($email);
+
+                    SendEmail::dispatch($email, $ip);
                 }
 
                 return response()->json([
@@ -163,7 +164,7 @@ class SendEmailController extends Controller
     /**
      * 处理发送邮箱逻辑
      */
-    public function handleSendEmail($jobId, $email) {
+    public function handleSendEmail($jobId, $email, $ip) {
         $flag = false;
         Log::info('给【' . $email . '】发送邮箱。');
 
@@ -179,7 +180,7 @@ class SendEmailController extends Controller
 
         SendEmailInfo::insert([
             'email' => $email,
-            'ip' => $this->getRequestIP(),
+            'ip' => $ip,
             'isSuccessful' => $flag ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s')
         ]);
@@ -190,24 +191,88 @@ class SendEmailController extends Controller
     /**
      * 获取请求的IP
      */
-    public function getRequestIP() {
-        $request = request();
-        // 按优先级尝试获取 IP
-        $ip = $request->header('X-Forwarded-For');
-
-        if (!empty($ip)) {
-            // X-Forwarded-For 可能包含多个 IP（代理链）
-            $ips = explode(',', $ip);
-            $ip = trim($ips[0]); // 第一个 IP 是客户端真实 IP
-        } else {
-            $ip = $request->ip();
+    public function getClientRealIp(Request $request) {
+        // 常见的代理服务器 IP 头字段（按优先级）
+        $ipHeaders = [
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR',
+        ];
+        
+        foreach ($ipHeaders as $header) {
+            if ($request->server($header)) {
+                $ip = $request->server($header);
+                
+                // 处理多个 IP 的情况（如 X-Forwarded-For: client, proxy1, proxy2）
+                if (strpos($ip, ',') !== false) {
+                    $ipList = explode(',', $ip);
+                    foreach ($ipList as $singleIp) {
+                        $singleIp = trim($singleIp);
+                        if ($this->isValidIp($singleIp)) {
+                            return $singleIp;
+                        }
+                    }
+                }
+                
+                if ($this->isValidIp($ip)) {
+                    return $ip;
+                }
+            }
         }
+        
+        return $request->ip();
+    }
 
-        // 过滤本地地址和无效 IP
-        if ($ip === '127.0.0.1' || $ip === '::1' || !filter_var($ip, FILTER_VALIDATE_IP)) {
-            $ip = $request->ip();
+    /**
+     * 验证 IP 地址是否有效
+     */
+    private function isValidIp($ip) {
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+            return false;
         }
+        
+        // 排除私有地址和保留地址
+        $privateRanges = [
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+            '127.0.0.0/8',
+            'fc00::/7', // IPv6 私有地址
+        ];
+        
+        foreach ($privateRanges as $range) {
+            if ($this->ipInRange($ip, $range)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 
-        return $ip;
+    /**
+     * 检查 IP 是否在指定范围内
+     */
+    private function ipInRange($ip, $range) {
+        if (strpos($range, '/') === false) {
+            return $ip === $range;
+        }
+        
+        list($range, $netmask) = explode('/', $range, 2);
+        
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $ipDecimal = ip2long($ip);
+            $rangeDecimal = ip2long($range);
+            $wildcardDecimal = pow(2, (32 - $netmask)) - 1;
+            $netmaskDecimal = ~$wildcardDecimal;
+            
+            return ($ipDecimal & $netmaskDecimal) === ($rangeDecimal & $netmaskDecimal);
+        }
+        
+        // 简化 IPv6 处理（生产环境建议使用专门的 IPv6 处理库）
+        return false;
     }
 }
