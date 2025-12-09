@@ -12,6 +12,7 @@ use App\Jobs\SendEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\SendEmailInfo;
 
 class SendEmailController extends Controller
 {
@@ -33,7 +34,6 @@ class SendEmailController extends Controller
      */
     public function runTest()
     {
-        //
         echo "hello word!<br />";
 
         echo 'oh!';
@@ -177,6 +177,37 @@ class SendEmailController extends Controller
             Log::info('给【' . $email . '】发送邮箱失败。错误信息：' . $e->getMessage());
         }
 
+        SendEmailInfo::insert([
+            'email' => $email,
+            'ip' => $this->getRequestIP(),
+            'isSuccessful' => $flag ? 1 : 0,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
         Log::info('给【' . $email . '】发送邮箱' . ($flag ? '成功' : '失败') . '。');
+    }
+
+    /**
+     * 获取请求的IP
+     */
+    public function getRequestIP() {
+        $request = request();
+        // 按优先级尝试获取 IP
+        $ip = $request->header('X-Forwarded-For');
+
+        if (!empty($ip)) {
+            // X-Forwarded-For 可能包含多个 IP（代理链）
+            $ips = explode(',', $ip);
+            $ip = trim($ips[0]); // 第一个 IP 是客户端真实 IP
+        } else {
+            $ip = $request->ip();
+        }
+
+        // 过滤本地地址和无效 IP
+        if ($ip === '127.0.0.1' || $ip === '::1' || !filter_var($ip, FILTER_VALIDATE_IP)) {
+            $ip = $request->ip();
+        }
+
+        return $ip;
     }
 }

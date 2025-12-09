@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateSendEmailInfoTable extends Migration
 {
+    // php artisan make:migration create_send_email_info_table
+    // php artisan migrate --path=/database/migrations/2025_12_08_062039_create_send_email_info_table.php
+
     /**
      * Run the migrations.
      *
@@ -15,7 +18,11 @@ class CreateSendEmailInfoTable extends Migration
     {
         Schema::create('send_email_info', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->timestamps();
+            $table->string('email');
+            $table->string('ip');
+            $table->integer('isSuccessful')->comment('邮箱是否发送成功:1成功,0失败');
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 
