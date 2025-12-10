@@ -108,7 +108,7 @@ class QWenConteroller extends Controller
                             // 发送websocket
                             $client->request(
                                 'POST',
-                                env('QWEN_WEBSOCKET') . '/qwen',
+                                '127.0.0.1:9502/websocket/qwen',
                                 [
                                     'headers' => [
                                         'Content-Type' => 'application/json'
