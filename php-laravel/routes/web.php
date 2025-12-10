@@ -12,6 +12,7 @@
 */
 
 use App\Http\Controllers\Email\SendEmailController;
+use App\Http\Controllers\AI\QWenConteroller;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -26,3 +27,5 @@ use App\Http\Controllers\Email\SendEmailController;
 Route::get('runTest', [SendEmailController::class, 'runTest']);
 Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
 // Route::resource('email', 'Email\SendEmailController');
+
+Route::post('chatQWen', [QWenConteroller::class, 'chat']);
