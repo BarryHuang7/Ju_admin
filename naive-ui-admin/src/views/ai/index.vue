@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, nextTick, watch, onMounted, reactive } from 'vue';
+  import { ref, nextTick, onMounted, reactive } from 'vue';
   import {
     RobotOutlined,
     SendOutlined,
@@ -187,15 +187,6 @@
     });
   };
 
-  // 监听消息变化，自动滚动
-  watch(
-    messages,
-    () => {
-      scrollToBottom();
-    },
-    { deep: true }
-  );
-
   // 初始化时滚动到底部
   onMounted(() => {
     scrollToBottom();
@@ -212,10 +203,7 @@
       </n-alert>
     </n-space>
 
-    <div
-      ref="messagesContainer"
-      class="h-[calc(100vh-118px-56px-64px)] flex flex-col bg-[#151517] p-5 relative"
-    >
+    <div class="h-[calc(100vh-118px-56px-64px)] flex flex-col bg-[#151517] p-5 relative">
       <!-- 欢迎 -->
       <div v-if="messages.length === 0" class="flex justify-center items-center h-full text-center">
         <div class="max-w-400px">
@@ -230,7 +218,10 @@
       </div>
 
       <!-- 消息列表 -->
-      <div class="overflow-y-auto h-[calc(100vh-118px-56px-64px-150px-35px)]">
+      <div
+        ref="messagesContainer"
+        class="overflow-y-auto h-[calc(100vh-118px-56px-64px-150px-35px)]"
+      >
         <div
           v-for="(msg, index) in messages"
           :key="index"
@@ -260,7 +251,7 @@
               </div>
 
               <!-- 打字指示器 -->
-              <div v-if="msg.loading" class="mt-2 flex items-center gap-1">
+              <div v-if="msg.loading" class="mt-6 mb-10 flex items-center gap-1">
                 <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
                 <div
                   class="w-2 h-2 rounded-full bg-blue-500 animate-bounce animation-delay--160ms"
