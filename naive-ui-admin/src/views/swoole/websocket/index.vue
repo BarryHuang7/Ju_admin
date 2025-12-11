@@ -109,7 +109,9 @@
 
   const ws = ref<WebSocket>();
 
-  ws.value = new WebSocket('ws://110.41.16.194:9502/websocket');
+  ws.value = new WebSocket(
+    `ws://110.41.16.194:9502/websocket/${userInfo['name']}/${userInfo['id']}`
+  );
 
   ws.value.onmessage = (msg) => {
     const data = JSON.parse(msg.data);

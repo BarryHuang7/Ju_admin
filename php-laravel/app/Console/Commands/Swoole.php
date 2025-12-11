@@ -65,8 +65,9 @@ class Swoole extends Command
             $params = $this->parsePath($path);
 
             if ($params['user_name'] && $params['user_id']) {
-                Redis::set('PHP_Redis_WebSocket_' . $params['user_name'] . '_' . $params['user_id'], $fd);
-                Redis::set('PHP_Redis_FD_' . $fd, json_encode([
+                // 2小时过期，节省资源
+                Redis::setex('PHP_Redis_WebSocket_' . $params['user_name'] . '_' . $params['user_id'], 7200, $fd);
+                Redis::setex('PHP_Redis_FD_' . $fd, 7200, json_encode([
                     'user_name' => $params['user_name'],
                     'user_id' => $params['user_id']
                 ]));
@@ -102,13 +103,15 @@ class Swoole extends Command
                         $userName = isset($postData['user_name']) ? $postData['user_name'] : '';
                         $userId = isset($postData['user_id']) ? $postData['user_id'] : '';
                         $content = isset($postData['content']) ? $postData['content'] : '';
+                        $finish_reason = isset($postData['finish_reason']) ? $postData['finish_reason'] : '';
 
-                        if ($userName && $userId && $content) {
+                        if ($userName && $userId && ($content || $finish_reason)) {
                             $fd = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
 
                             if ($fd && $this->ws->isEstablished($fd)) {
                                 $this->ws->push($fd, json_encode([
-                                    'content' => $content
+                                    'content' => $content,
+                                    'finish_reason' => $finish_reason
                                 ], JSON_UNESCAPED_UNICODE));
 
                                 $response->end(json_encode(['code' => 200]));

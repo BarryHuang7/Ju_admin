@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Email\SendEmailController;
+use App\QWenInfo;
 
 class QWenConteroller extends Controller
 {
@@ -20,7 +21,7 @@ class QWenConteroller extends Controller
         $messages = isset($input['messages']) ? $input['messages'] : '';
 
         $ip = (new SendEmailController())->getClientRealIp($request);
-        $log_msg = "ip: " . $ip . ", user_id: " . $userId . ", user_name: " . $userName . ", messages: " . $messages;
+        $log_msg = "ip:【" . $ip . "】, user_id:【" . $userId . "】, user_name:【" . $userName . "】, messages:【" . $messages . "】";
 
         Log::info($log_msg . ", 正在请求QWen chat。");
 
@@ -31,11 +32,16 @@ class QWenConteroller extends Controller
             ]);
         }
 
+        $qwenModel = new QWenInfo();
+        $qwenModel->ip = $ip;
+        $qwenModel->content = $messages;
+        $qwenModel->save();
+
         try {
             $client = new Client([
                 // 禁用 SSL 验证
                 'verify' => false,
-                'timeout' => 60
+                'timeout' => 120
             ]);
 
             $response = $client->request(
@@ -82,27 +88,44 @@ class QWenConteroller extends Controller
             }
 
             $data = $this->handleStreamResponse($buffer);
-            Log::info($log_msg . ", 请求QWen chat返回: " . json_encode($data) . "。");
+
+            $qwenModel->assistant_response_body = json_encode($data);
+            $qwenModel->save();
 
             /**
              * 通义千问回复完整语句
              */
             $assistantReply = '';
+            /**
+             * 输入的 Token 数
+             */
+            $prompt_tokens = 0;
+            /**
+             * 模型输出的 Token 数
+             */
+            $completion_tokens = 0;
+            /**
+             * 此次请求耗费金额
+             */
+            $amount = 0;
 
-            foreach ($data as $key => $item) {
+            foreach ($data as $item) {
                 $choices = isset($item['choices']) && count($item['choices']) > 0 ? $item['choices'][0] : [];
 
                 if ($choices) {
-                    if ($choices['finish_reason'] === 'stop') {
-                        break;
-                    }
-
+                    /**
+                     * 模型停止生成的原因
+                     * 1、触发输入参数中的stop参数，或自然停止输出时为stop
+                     * 2、生成长度过长而结束为length
+                     * 3、需要调用工具而结束为tool_calls
+                     */
+                    $finish_reason = isset($choices['finish_reason']) ? $choices['finish_reason'] : '';
                     $delta = isset($choices['delta']) ? $choices['delta'] : [];
 
                     if ($delta) {
                         $content = isset($delta['content']) ? $delta['content'] : '';
 
-                        if ($content) {
+                        if ($content || $finish_reason) {
                             $assistantReply .= $content;
 
                             // 发送websocket
@@ -116,16 +139,31 @@ class QWenConteroller extends Controller
                                     'json' => [
                                         'user_name' => $userName,
                                         'user_id' => $userId,
-                                        'content' => $content
+                                        'content' => $content,
+                                        'finish_reason' => $finish_reason
                                     ]
                                 ]
                             );
                         }
                     }
+                } else {
+                    // 最后包含 Token 消耗信息
+                    $usage = isset($item['usage']) ? $item['usage'] : [];
+
+                    if ($usage) {
+                        $prompt_tokens = $usage['prompt_tokens'];
+                        $completion_tokens = $usage['completion_tokens'];
+
+                        $amount = ($prompt_tokens * 0.0008) + ($completion_tokens * 0.002);
+                    }
                 }
             }
 
-            Log::info($log_msg . ", QWen回复: " . $assistantReply);
+            $qwenModel->prompt_tokens = $prompt_tokens;
+            $qwenModel->completion_tokens = $completion_tokens;
+            $qwenModel->assistant_content = $assistantReply;
+            $qwenModel->updated_at = date('Y-m-d H:i:s');
+            $qwenModel->save();
         } catch (RequestException $e) {
             Log::error('通义千问请求流式错误: ' . $e->getMessage());
             return response()->json([
@@ -136,7 +174,7 @@ class QWenConteroller extends Controller
 
         return response()->json([
             'code' => 200,
-            'msg' => ''
+            'msg' => '本次消耗 ' . $amount . ' 元！'
         ]);
     }
 
