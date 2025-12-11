@@ -22,6 +22,7 @@
   }
   interface contentQueueType {
     content: string;
+    finish_reason: string;
     index: number;
   }
 
@@ -51,19 +52,17 @@
     const data = JSON.parse(msg.data);
     const aiMessageIndex = messages.value.length - 1;
 
-    if (data?.content) {
-      contentQueue.push({ content: data.content, index: aiMessageIndex });
+    if (data?.content || data?.finish_reason) {
+      contentQueue.push({
+        content: data.content,
+        finish_reason: data.finish_reason,
+        index: aiMessageIndex,
+      });
 
       // 如果当前没有在处理，开始处理队列
       if (!isProcessing.value) {
         processQueue();
       }
-    }
-
-    // 完成流式输出
-    if (data?.finish_reason && data.finish_reason === 'stop') {
-      messages.value[aiMessageIndex].isStreaming = false;
-      messages.value[aiMessageIndex].loading = false;
     }
   };
 
@@ -77,7 +76,14 @@
     isProcessing.value = true;
     const item: any = contentQueue.shift();
 
-    await simulateStreamingResponse(item.content, item.index);
+    // 完成流式输出
+    if (item.finish_reason && item.finish_reason === 'stop') {
+      messages.value[item.index].isStreaming = false;
+      messages.value[item.index].loading = false;
+      isAIThinking.value = false;
+    } else {
+      await simulateStreamingResponse(item.content, item.index);
+    }
 
     // 处理完一个后继续处理下一个
     processQueue();
@@ -135,7 +141,9 @@
       })
         .then((res: any) => {
           if (res.data.code === 200) {
-            window['$message'].success(res.data.msg);
+            window['$message'].success(res.data.msg, {
+              duration: 5000,
+            });
           } else {
             window['$message'].error(res.data.msg);
           }
@@ -153,8 +161,6 @@
         isStreaming: false,
       };
       window['$message'].error('发送失败，请重试');
-    } finally {
-      isAIThinking.value = false;
     }
   };
 
@@ -224,7 +230,7 @@
       </div>
 
       <!-- 消息列表 -->
-      <div class="overflow-y-auto h-[calc(100vh-118px-56px-64px-150px)]">
+      <div class="overflow-y-auto h-[calc(100vh-118px-56px-64px-150px-35px)]">
         <div
           v-for="(msg, index) in messages"
           :key="index"
@@ -247,7 +253,10 @@
               </div>
               <div v-else class="leading-relaxed break-words ws-pre-wrap">
                 <span>{{ msg.content }}</span>
-                <span class="cursor animate-pulse text-blue-500">▌</span>
+                <span
+                  class="cursor animate-pulse text-blue-500 inline-block w-0.5 h-5 ml-1 animate-blink"
+                  >▌</span
+                >
               </div>
 
               <!-- 打字指示器 -->
@@ -278,7 +287,7 @@
       <!-- AI正在思考 -->
       <div v-if="isAIThinking" class="p-4 text-center">
         <div
-          class="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-20px text-gray-600"
+          class="inline-flex items-center gap-2 px-10 py-4 bg-gray-100 rounded-20px text-gray-600"
         >
           <span>正在思考...</span>
         </div>
