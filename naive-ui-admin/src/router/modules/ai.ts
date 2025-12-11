@@ -30,7 +30,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'index',
         name: 'qwen-index',
         meta: {
-          title: '千问chat',
+          title: '通义千问chat',
         },
         component: () => import('@/views/ai/index.vue'),
       },

@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Email\SendEmailController;
 use App\QWenInfo;
+use Illuminate\Support\Facades\Redis;
 
 class QWenConteroller extends Controller
 {
@@ -20,6 +21,15 @@ class QWenConteroller extends Controller
         $userName = isset($input['user_name']) ? $input['user_name'] : '';
         $messages = isset($input['messages']) ? $input['messages'] : '';
 
+        $websocketId = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
+
+        if (!$websocketId) {
+            return response()->json([
+                'code' => 403,
+                'msg' => '会话过期，请刷新页面！'
+            ]);
+        }
+
         $ip = (new SendEmailController())->getClientRealIp($request);
         $log_msg = "ip:【" . $ip . "】, user_id:【" . $userId . "】, user_name:【" . $userName . "】, messages:【" . $messages . "】";
 
@@ -28,7 +38,7 @@ class QWenConteroller extends Controller
         if (!$userId || !$userName || !$messages) {
             return response()->json([
                 'code' => 400,
-                'msg' => ''
+                'msg' => '非法请求！'
             ]);
         }
 

@@ -17,11 +17,17 @@
     <div mt-20>
       <p c-green>功能列表：</p>
       <div>
-        <n-button type="info" @click="skip(1)" mt-20 md:mt-10 mr-10>图片列表</n-button>
-        <n-button type="info" @click="skip(2)" mt-20 md:mt-10 mr-10>Java WebSocket</n-button>
-        <n-button type="info" @click="skip(3)" mt-20 md:mt-10 mr-10>Swoole WebSocket</n-button>
-        <n-button type="info" @click="skip(4)" mt-20 md:mt-10 mr-10>发送邮箱</n-button>
-        <n-button type="info" @click="skip(5)" mt-20 md:mt-10 mr-10>千问chat</n-button>
+        <div>
+          <div mt-20>Java</div>
+          <n-button type="info" @click="skip(1)" mt-20 md:mt-10 mr-10>图片列表</n-button>
+          <n-button type="info" @click="skip(2)" mt-20 md:mt-10 mr-10>Java WebSocket</n-button>
+        </div>
+        <div>
+          <div mt-20>PHP</div>
+          <n-button type="info" @click="skip(3)" mt-20 md:mt-10 mr-10>Swoole WebSocket</n-button>
+          <n-button type="info" @click="skip(4)" mt-20 md:mt-10 mr-10>发送邮箱</n-button>
+          <n-button type="info" @click="skip(5)" mt-20 md:mt-10 mr-10>通义千问chat</n-button>
+        </div>
       </div>
     </div>
   </div>

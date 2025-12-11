@@ -244,7 +244,8 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
   return new VAxios(
     deepMerge(
       {
-        timeout: 10 * 1000,
+        // 请求超时时间
+        timeout: 60 * 1000,
         authenticationScheme: 'Bearer',
         // 接口前缀
         prefixUrl: urlPrefix,

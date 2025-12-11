@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-  import { ref, nextTick, watch, onMounted } from 'vue';
+  import { ref, nextTick, watch, onMounted, reactive } from 'vue';
   import {
     RobotOutlined,
     SendOutlined,
     ExclamationCircleOutlined,
     DeleteOutlined,
-    UserOutlined,
   } from '@vicons/antd';
+  import { useUserStore } from '@/store/modules/user';
+  import { chatQWen } from '@/api/php/ai';
 
   interface messagesType {
     role: string;
@@ -19,35 +20,84 @@
     scrollTop?: number;
     scrollHeight?: number;
   }
+  interface contentQueueType {
+    content: string;
+    index: number;
+  }
 
+  const _components = {
+    RobotOutlined,
+    SendOutlined,
+    ExclamationCircleOutlined,
+    DeleteOutlined,
+  };
+  const userStore = useUserStore();
+  const userInfo: object = userStore.getUserInfo || {};
   const messages = ref<messagesType[]>([]);
   const inputText = ref('');
   const messagesContainer = ref<messagesContainerType | null>(null);
   const isAIThinking = ref(false);
+  // 添加队列控制
+  const isProcessing = ref(false);
+  const contentQueue = reactive<contentQueueType[]>([]);
+
+  const ws = ref<WebSocket>();
+
+  ws.value = new WebSocket(
+    `ws://110.41.16.194:9502/websocket/${userInfo['name']}/${userInfo['id']}`
+  );
+
+  ws.value.onmessage = async (msg: any) => {
+    const data = JSON.parse(msg.data);
+    const aiMessageIndex = messages.value.length - 1;
+
+    if (data?.content) {
+      contentQueue.push({ content: data.content, index: aiMessageIndex });
+
+      // 如果当前没有在处理，开始处理队列
+      if (!isProcessing.value) {
+        processQueue();
+      }
+    }
+
+    // 完成流式输出
+    if (data?.finish_reason && data.finish_reason === 'stop') {
+      messages.value[aiMessageIndex].isStreaming = false;
+      messages.value[aiMessageIndex].loading = false;
+    }
+  };
+
+  // 串行处理队列
+  const processQueue = async () => {
+    if (contentQueue.length === 0) {
+      isProcessing.value = false;
+      return;
+    }
+
+    isProcessing.value = true;
+    const item: any = contentQueue.shift();
+
+    await simulateStreamingResponse(item.content, item.index);
+
+    // 处理完一个后继续处理下一个
+    processQueue();
+  };
 
   // 模拟流式响应
   const simulateStreamingResponse = async (text, messageIndex) => {
     const words = text.split('');
-    let currentText = '';
 
     for (let i = 0; i < words.length; i++) {
       await new Promise((resolve) => setTimeout(resolve, 20 + Math.random() * 30));
-      currentText += words[i];
-      messages.value[messageIndex].content = currentText;
+      messages.value[messageIndex].content += words[i];
       scrollToBottom();
     }
-
-    // 完成流式输出
-    messages.value[messageIndex].isStreaming = false;
-    messages.value[messageIndex].loading = false;
   };
 
   // 发送消息
   const handleSend = async () => {
     const text = inputText.value.trim();
     if (!text || isAIThinking.value) return;
-
-    window['$message'].warning('接口正在开发中...');
 
     // 添加用户消息
     messages.value.push({
@@ -75,23 +125,24 @@
     scrollToBottom();
 
     try {
-      // 模拟延迟，显示正在思考
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // 示例：模拟AI响应
-      const responses = [
-        '你好！这是一个流式响应的示例。我能够逐字显示回复内容，就像真正的AI聊天一样。',
-        '我是通义千问，由阿里云研发的超大规模语言模型。我能够回答问题、创作文字，比如写故事、写公文、写邮件、写剧本等等，还能进行逻辑推理、编程等任务。如果你有任何问题或需要帮助，欢迎随时告诉我！',
-        '无法获取实时天气信息。建议你通过天气应用（如中国天气、墨迹天气）或搜索引擎查询“深圳今天天气”，即可获得最新的温度、降水、风力等信息。',
-      ];
-
-      const responseText = responses[Math.floor(Math.random() * responses.length)];
-
       // 更新AI消息内容
       messages.value[aiMessageIndex].content = '';
 
-      // 开始流式输出
-      await simulateStreamingResponse(responseText, aiMessageIndex);
+      chatQWen({
+        user_id: userInfo['id'],
+        user_name: userInfo['name'],
+        messages: text,
+      })
+        .then((res: any) => {
+          if (res.data.code === 200) {
+            window['$message'].success(res.data.msg);
+          } else {
+            window['$message'].error(res.data.msg);
+          }
+        })
+        .catch((e) => {
+          window['$message'].error(e);
+        });
     } catch (error) {
       console.error('发送消息失败:', error);
       messages.value[aiMessageIndex] = {
@@ -150,7 +201,7 @@
     <n-space vertical :size="12" class="mb-20">
       <n-alert title="功能说明" type="info">
         <span>这是使用</span>
-        <span class="high-light">阿里千问plus</span>
+        <span class="high-light">阿里通义千问plus</span>
         <span>的流式AI问答功能。</span>
       </n-alert>
     </n-space>
@@ -180,7 +231,9 @@
           :class="['mb-6 animate-fade-in', msg.role === 'user' ? 'user-message' : 'ai-message']"
         >
           <!-- 消息气泡 -->
-          <div :class="['flex items-start gap-3', msg.role === 'user' ? 'justify-end' : '']">
+          <div
+            :class="['flex items-start gap-3', msg.role === 'user' ? 'justify-end mr-10' : 'ml-10']"
+          >
             <div
               :class="[
                 'max-w-70% px-8 py-6 rounded-22px',
@@ -189,10 +242,10 @@
                   : 'bg-gray-100 text-gray-800 order-2',
               ]"
             >
-              <div v-if="!msg.isStreaming" class="leading-relaxed break-words">
+              <div v-if="!msg.isStreaming" class="leading-relaxed break-words ws-pre-wrap">
                 {{ msg.content }}
               </div>
-              <div v-else class="leading-relaxed break-words">
+              <div v-else class="leading-relaxed break-words ws-pre-wrap">
                 <span>{{ msg.content }}</span>
                 <span class="cursor animate-pulse text-blue-500">▌</span>
               </div>
