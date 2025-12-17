@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Email\SendEmailController;
 use App\QWenInfo;
 use Illuminate\Support\Facades\Redis;
+use App\Jobs\TaskScheduler;
 
 class QWenConteroller extends Controller
 {
@@ -47,7 +48,29 @@ class QWenConteroller extends Controller
         $qwenModel->content = $messages;
         $qwenModel->save();
 
+        TaskScheduler::dispatch(2, [
+            'userId' => $userId,
+            'userName' => $userName,
+            'messages' => $messages,
+            'qwenModel' => $qwenModel
+        ], $ip);
+
+        return response()->json([
+            'code' => 200,
+            'msg' => '已成功加入队列'
+        ]);
+    }
+
+    /**
+     * 处理调用通义千问API逻辑
+     */
+    public function handQWenAPI($data, $ip) {
         try {
+            $userId = $data['userId'];
+            $userName = $data['userName'];
+            $messages = $data['messages'];
+            $qwenModel = $data['qwenModel'];
+
             $client = new Client([
                 // 禁用 SSL 验证
                 'verify' => false,
@@ -165,6 +188,22 @@ class QWenConteroller extends Controller
                         $completion_tokens = $usage['completion_tokens'];
 
                         $amount = ($prompt_tokens * 0.0008) + ($completion_tokens * 0.002);
+
+                        // 发送websocket通知
+                        $client->request(
+                            'POST',
+                            '127.0.0.1:9502/websocket/notice',
+                            [
+                                'headers' => [
+                                    'Content-Type' => 'application/json'
+                                ],
+                                'json' => [
+                                    'user_name' => $userName,
+                                    'user_id' => $userId,
+                                    'content' => '本次消耗 ' . $amount . ' 元！'
+                                ]
+                            ]
+                        );
                     }
                 }
             }
@@ -174,18 +213,12 @@ class QWenConteroller extends Controller
             $qwenModel->assistant_content = $assistantReply;
             $qwenModel->updated_at = date('Y-m-d H:i:s');
             $qwenModel->save();
+
+            $log_msg = "ip:【" . $ip . "】, user_id:【" . $userId . "】, user_name:【" . $userName . "】, messages:【" . $messages . "】";
+            Log::info($log_msg . ", 完成QWen chat请求。");
         } catch (RequestException $e) {
             Log::error('通义千问请求流式错误: ' . $e->getMessage());
-            return response()->json([
-                'code' => 400,
-                'msg' => '通义千问请求流式错误'
-            ]);
         }
-
-        return response()->json([
-            'code' => 200,
-            'msg' => '本次消耗 ' . $amount . ' 元！'
-        ]);
     }
 
     /**

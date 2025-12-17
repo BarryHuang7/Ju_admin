@@ -50,19 +50,37 @@
 
   ws.value.onmessage = async (msg: any) => {
     const data = JSON.parse(msg.data);
-    const aiMessageIndex = messages.value.length - 1;
+    /**
+     * 消息类型：1通义千问AI，2系统通知
+     */
+    const type = data?.type || 0;
 
-    if (data?.content || data?.finish_reason) {
-      contentQueue.push({
-        content: data.content,
-        finish_reason: data.finish_reason,
-        index: aiMessageIndex,
-      });
+    switch (type) {
+      case 1:
+        const aiMessageIndex = messages.value.length - 1;
 
-      // 如果当前没有在处理，开始处理队列
-      if (!isProcessing.value) {
-        processQueue();
-      }
+        if (data?.content || data?.finish_reason) {
+          contentQueue.push({
+            content: data.content,
+            finish_reason: data.finish_reason,
+            index: aiMessageIndex,
+          });
+
+          // 如果当前没有在处理，开始处理队列
+          if (!isProcessing.value) {
+            processQueue();
+          }
+        }
+        break;
+      case 2:
+        window['$message'].info(data?.content || '未知信息', {
+          duration: 5000,
+        });
+        break;
+      default:
+        window['$message'].error('错误信息类型 ' + type);
+        console.error('错误消息：' + data);
+        break;
     }
   };
 
@@ -198,6 +216,8 @@
     <n-space vertical :size="12" class="mb-20">
       <n-alert title="功能说明" type="info">
         <span>这是使用</span>
+        <span class="high-light">队列</span>
+        <span>请求</span>
         <span class="high-light">阿里通义千问plus</span>
         <span>的流式AI问答功能。</span>
       </n-alert>

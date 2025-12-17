@@ -110,6 +110,7 @@ class Swoole extends Command
 
                             if ($fd && $this->ws->isEstablished($fd)) {
                                 $this->ws->push($fd, json_encode([
+                                    'type' => 1,
                                     'content' => $content,
                                     'finish_reason' => $finish_reason
                                 ], JSON_UNESCAPED_UNICODE));
@@ -122,7 +123,34 @@ class Swoole extends Command
                             $response->end(json_encode(['code' => 400]));
                         }
                     }
-                break;
+                    break;
+                // 通知
+                case '/websocket/notice':
+                    if ($method === 'POST') {
+                        $postData = $request->post ?: json_decode($request->rawContent(), true);
+
+                        $userName = isset($postData['user_name']) ? $postData['user_name'] : '';
+                        $userId = isset($postData['user_id']) ? $postData['user_id'] : '';
+                        $content = isset($postData['content']) ? $postData['content'] : '';
+
+                        if ($userName && $userId && $content) {
+                            $fd = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
+
+                            if ($fd && $this->ws->isEstablished($fd)) {
+                                $this->ws->push($fd, json_encode([
+                                    'type' => 2,
+                                    'content' => $content
+                                ], JSON_UNESCAPED_UNICODE));
+
+                                $response->end(json_encode(['code' => 200]));
+                            } else {
+                                $response->end(json_encode(['code' => 400]));
+                            }
+                        } else {
+                            $response->end(json_encode(['code' => 400]));
+                        }
+                    }
+                    break;
                 default:
                     $response->end(json_encode(['code' => 400]));
             }

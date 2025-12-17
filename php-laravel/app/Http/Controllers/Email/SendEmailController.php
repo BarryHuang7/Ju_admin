@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 // use PhpOffice\PhpSpreadsheet\IOFactory;
 // use PhpOffice\PhpSpreadsheet\Writer\Xls;
-use App\Jobs\SendEmail;
+use App\Jobs\TaskScheduler;
 // use Illuminate\Support\Facades\Redis;
 // use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -140,7 +140,7 @@ class SendEmailController extends Controller
                     $email = trim($e);
                     Log::info('正在发送邮箱【' . $email . '】');
 
-                    SendEmail::dispatch($email, $ip);
+                    TaskScheduler::dispatch(1, $email, $ip);
                 }
 
                 return response()->json([
@@ -164,7 +164,7 @@ class SendEmailController extends Controller
     /**
      * 处理发送邮箱逻辑
      */
-    public function handleSendEmail($jobId, $email, $ip) {
+    public function handleSendEmail($email, $ip) {
         $flag = false;
         Log::info('给【' . $email . '】发送邮箱。');
 
