@@ -66,6 +66,7 @@ class Swoole extends Command
 
             if ($params['user_name'] && $params['user_id']) {
                 // 2小时过期，节省资源
+                // ex过期3600秒，nx不存在才创建返回true Redis::set($key, json_encode($data), 'EX', 3600, 'NX');
                 Redis::setex('PHP_Redis_WebSocket_' . $params['user_name'] . '_' . $params['user_id'], 7200, $fd);
                 Redis::setex('PHP_Redis_FD_' . $fd, 7200, json_encode([
                     'user_name' => $params['user_name'],
