@@ -13,6 +13,7 @@
 
 use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
+use App\Http\Controllers\Home\IndexController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -29,3 +30,5 @@ Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
 // Route::resource('email', 'Email\SendEmailController');
 
 Route::post('chatQWen', [QWenConteroller::class, 'chat']);
+
+Route::get('guestRecord', [IndexController::class, 'guestRecord']);

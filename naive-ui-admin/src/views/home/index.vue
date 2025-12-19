@@ -1,65 +1,161 @@
 <template>
   <div>
-    <div flex justify-center items-center>
-      <div @click="test()" inline-block text-center cursor-pointer title="你点我试试？">
+    <div class="flex justify-center items-center">
+      <div
+        @click="tryClicking()"
+        class="inline-block text-center cursor-pointer"
+        title="你点我试试？"
+      >
         首页啥都没有呢！
       </div>
     </div>
 
-    <n-statistic tabular-nums mt-10>
-      <span>今日访客量：</span>
+    <n-statistic tabular-nums class="mt-10">
+      <span>今日登录人数：</span>
       <span c-green>
-        <n-number-animation :from="0" :to="number" />
+        <n-number-animation :from="0" :to="todayNumberOfLogins" />
       </span>
-      <template #suffix>人</template>
+      <template #suffix>人（包括admin）</template>
     </n-statistic>
 
-    <div mt-20>
+    <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
         <div>
-          <div mt-20>Java</div>
-          <n-button type="info" @click="skip(1)" mt-20 md:mt-10 mr-10>图片列表</n-button>
-          <n-button type="info" @click="skip(2)" mt-20 md:mt-10 mr-10>Java WebSocket</n-button>
+          <div class="mt-20">Java</div>
+          <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
+          <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">
+            Java WebSocket
+          </n-button>
         </div>
         <div>
-          <div mt-20>PHP</div>
-          <n-button type="info" @click="skip(3)" mt-20 md:mt-10 mr-10>Swoole WebSocket</n-button>
-          <n-button type="info" @click="skip(4)" mt-20 md:mt-10 mr-10>发送邮箱</n-button>
-          <n-button type="info" @click="skip(5)" mt-20 md:mt-10 mr-10>通义千问chat</n-button>
+          <div class="mt-20">PHP</div>
+          <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10"
+            >Swoole WebSocket</n-button
+          >
+          <n-button type="info" @click="skip(4)" class="mt-20 md:mt-10 mr-10">发送邮箱</n-button>
+          <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
+            通义千问chat
+          </n-button>
         </div>
       </div>
+    </div>
+
+    <div class="mt-40 w-full h-[400px]">
+      <v-chart :option="chartOption" autoresize />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { ref, reactive, onMounted, computed } from 'vue';
   import { toHttp } from '@/api/table/list';
+  import { guestRecord } from '@/api/php/home';
   import { useRouter } from 'vue-router';
+  import { use } from 'echarts/core';
+  import { CanvasRenderer } from 'echarts/renderers';
+  import { PieChart, BarChart, LineChart } from 'echarts/charts';
+  import {
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+    GridComponent,
+  } from 'echarts/components';
+  import VChart from 'vue-echarts';
+
+  interface guestRecordDataType {
+    month: string;
+    xAxis: Array<string>;
+    series: Array<number>;
+  }
+
   const router = useRouter();
+  use([
+    CanvasRenderer,
+    BarChart,
+    LineChart,
+    PieChart,
+    GridComponent,
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+  ]);
 
-  const number = ref(0);
-  let i = 0;
+  /**
+   * 今日登录人数
+   */
+  const todayNumberOfLogins = ref(0);
+  /**
+   * 尝试点击数
+   */
+  const i = ref(0);
+  /**
+   * 访客图表标题
+   */
+  const chartTitle = ref('每月访客记录');
+  /**
+   * 访客图表x轴数据
+   */
+  const chartXAxisData = reactive<string[]>([]);
+  /**
+   * 访客图表y轴数据
+   */
+  const chartYAxisData = reactive<number[]>([]);
+  /**
+   * 访客图表配置
+   */
+  const chartOption = computed(() => ({
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+      },
+    },
+    title: {
+      text: chartTitle.value,
+    },
+    xAxis: {
+      type: 'category',
+      data: chartXAxisData,
+    },
+    yAxis: {
+      type: 'value',
+    },
+    series: [
+      {
+        data: chartYAxisData,
+        type: 'bar',
+      },
+    ],
+  }));
 
-  const test = () => {
-    i++;
+  /**
+   * 尝试点击
+   */
+  const tryClicking = () => {
+    i.value++;
     let msg = '你非要点是吧？';
-    if (i > 1) {
-      msg += '还点' + i + '次！';
+    if (i.value > 1) {
+      msg += '还点' + i.value + '次！';
     }
     window['$message'].warning(msg);
   };
 
+  /**
+   * 获取今日访客数
+   */
   const getVisitorNumber = async () => {
     const url = '/h/getVisitorNumber';
     const type = 'GET';
 
     await toHttp(url, type).then((res) => {
-      number.value = res.data.number || 0;
+      todayNumberOfLogins.value = res.data.number || 0;
     });
   };
 
+  /**
+   * 按钮跳转
+   */
   const skip = (type: number) => {
     switch (type) {
       case 1:
@@ -80,5 +176,23 @@
     }
   };
 
-  getVisitorNumber();
+  /**
+   * 获取访客图表数据
+   */
+  const getGuestRecord = () => {
+    guestRecord().then((res: any) => {
+      const data: guestRecordDataType = res.data.data;
+
+      if (data) {
+        chartTitle.value = data.month + ' 访客记录';
+        chartXAxisData.push(...data.xAxis);
+        chartYAxisData.push(...data.series);
+      }
+    });
+  };
+
+  onMounted(() => {
+    getVisitorNumber();
+    getGuestRecord();
+  });
 </script>

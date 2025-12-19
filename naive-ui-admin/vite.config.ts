@@ -22,9 +22,8 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
   const root = process.cwd();
   const env = loadEnv(mode, root);
   const viteEnv = wrapperEnv(env);
-  const { VITE_PUBLIC_PATH, VITE_DROP_CONSOLE, VITE_PORT, VITE_GLOB_PROD_MOCK, VITE_PROXY } =
-    viteEnv;
-  const prodMock = VITE_GLOB_PROD_MOCK;
+  const { VITE_PUBLIC_PATH, VITE_PORT, VITE_PROXY } = viteEnv;
+  // const prodMock = VITE_GLOB_PROD_MOCK;
   const isBuild = command === 'build';
   return {
     base: VITE_PUBLIC_PATH,
@@ -42,9 +41,16 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       ],
       dedupe: ['vue'],
     },
-    plugins: createVitePlugins(viteEnv, isBuild, prodMock),
+    plugins: createVitePlugins(viteEnv, isBuild),
+    // plugins: createVitePlugins(viteEnv, isBuild, prodMock),
     define: {
       __APP_INFO__: JSON.stringify(__APP_INFO__),
+      // 支持Options API写法
+      __VUE_OPTIONS_API__: true,
+      // 生产环境关闭 Vue DevTools 支持
+      __VUE_PROD_DEVTOOLS__: false,
+      // 生产环境不显示 hydration（水合）不匹配的详细信息
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     },
     css: {
       preprocessorOptions: {
@@ -68,7 +74,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       // }
     },
     optimizeDeps: {
-      include: [],
+      include: ['echarts'],
       exclude: ['vue-demi'],
     },
     build: {

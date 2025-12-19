@@ -14,7 +14,7 @@ use App\Jobs\TaskScheduler;
 
 class QWenConteroller extends Controller
 {
-    // php artisan make:controller QWenConteroller
+    // php artisan make:controller AI/QWenConteroller
 
     public function chat(Request $request) {
         $input = $request->input();
