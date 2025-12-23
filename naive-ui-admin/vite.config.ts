@@ -75,7 +75,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     },
     optimizeDeps: {
       include: ['echarts'],
-      exclude: ['vue-demi'],
+      exclude: ['vue', 'vue-demi'],
     },
     build: {
       target: 'es2015',

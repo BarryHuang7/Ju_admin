@@ -16,7 +16,7 @@ class CreateOrderRecordTable extends Migration
         Schema::create('order_record', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->ipAddress('ip');
-            $table->string('session_id', 100)->comment('会话id');
+            $table->string('user_id', 100)->comment('用户id');
             $table->string('order_no', 50)->comment('订单编号');
             $table->string('order_name')->comment('订单名称');
             $table->string('product_name')->comment('产品名称');
@@ -27,11 +27,11 @@ class CreateOrderRecordTable extends Migration
             $table->timestamp('updated_at')->nullable()->comment('更新时间');
             // 索引
             $table->unique('id');
-            $table->index('session_id');
+            $table->index('user_id');
             $table->index('order_no');
             $table->index('product_number');
-            $table->index(['session_id', 'order_no']);
-            $table->index(['session_id', 'product_number']);
+            $table->index(['user_id', 'order_no']);
+            $table->index(['user_id', 'product_number']);
         });
     }
 

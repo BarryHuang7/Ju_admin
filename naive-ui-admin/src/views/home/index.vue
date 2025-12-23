@@ -37,6 +37,9 @@
           <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
             通义千问chat
           </n-button>
+          <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
+            模拟商品秒杀
+          </n-button>
         </div>
       </div>
     </div>
@@ -172,6 +175,9 @@
         break;
       case 5:
         router.push('/qwen/index');
+        break;
+      case 6:
+        router.push('/order/index');
         break;
     }
   };

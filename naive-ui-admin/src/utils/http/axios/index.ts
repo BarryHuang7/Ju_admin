@@ -293,7 +293,7 @@ export const httpTwo = createAxios({
   requestOptions: {
     apiUrl: globSetting.apiUrl,
     urlPrefix: phpUrlPrefix,
-    withToken: false,
+    withToken: true,
     isReturnNativeResponse: true,
     isTransformResponse: false,
   },

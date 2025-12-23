@@ -47,7 +47,7 @@ export const constantRouter: any[] = [LoginRoute, RootRoute, RedirectRoute];
 
 const router = createRouter({
   history: createWebHashHistory(''),
-  routes: constantRouter,
+  routes: [...constantRouter, ...asyncRoutes],
   strict: true,
   scrollBehavior: () => ({ left: 0, top: 0 }),
 });

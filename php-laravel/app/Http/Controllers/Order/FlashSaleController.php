@@ -15,25 +15,40 @@ class FlashSaleController extends Controller
      */
     public function simulationFlashSale(Request $request) {
         try {
+            $authorization = $request->header('Authorization');
+
+            if (!$authorization) {
+                return response()->json([
+                    'code' => 403,
+                    'msg' => '非法请求！'
+                ]);
+            }
+
+            $userId = Redis::get($authorization);
+
+            if (!$userId) {
+                return response()->json([
+                    'code' => 403,
+                    'msg' => '非法请求！'
+                ]);
+            }
+
             $input = $request->input();
 
             /**
              * 是否开启接口幂等性
              */
-            $enableIdempotency = isset($input['enableIdempotency']) ? $input['enableIdempotency'] : false;
+            $enableIdempotency = isset($input['enableIdempotency']) ? $input['enableIdempotency'] : '';
 
             $ip = (new UtilsController())->getClientRealIp($request);
-            // 会话过期120分钟（详细配置见env SESSION_LIFETIME），一般用登录token保存
-            $session = $request->session();
-            $sessionId = $session->getId();
 
-            if ($enableIdempotency) {
-                $temp = Redis::set('simulationFlashSale_' . $sessionId, json_encode([
+            if ($enableIdempotency === true) {
+                $temp = Redis::set('simulationFlashSale_' . $userId, json_encode([
                     'status' => true
                 ]), 'EX', 10, 'NX');
 
                 if ($temp) {
-                    $this->saveOrder($ip, $sessionId);
+                    $this->saveOrder($ip, $userId);
 
                     return response()->json([
                         'code' => 200,
@@ -45,12 +60,17 @@ class FlashSaleController extends Controller
                         'msg' => '请求繁忙，请稍后重试！'
                     ]);
                 }
-            } else {
-                $this->saveOrder($ip);
+            } else if ($enableIdempotency === false) {
+                $this->saveOrder($ip, $userId);
 
                 return response()->json([
                     'code' => 200,
                     'msg' => '下单成功！'
+                ]);
+            } else {
+                return response()->json([
+                    'code' => 400,
+                    'msg' => '非法请求！'
                 ]);
             }
         } catch (RequestException $e) {
@@ -67,10 +87,10 @@ class FlashSaleController extends Controller
     /**
      * 订单加一
      */
-    private function saveOrder($ip, $sessionId) {
+    private function saveOrder($ip, $userId) {
         $order = new OrderRecord();
-        $order->id = $ip;
-        $order->session_id = $sessionId;
+        $order->ip = $ip;
+        $order->user_id = $userId;
         $order->order_no = 'NO1234567';
         $order->order_name = 'XX商城订单';
         $order->product_name = 'XX商城限时秒杀优惠衣服';
