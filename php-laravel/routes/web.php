@@ -14,6 +14,7 @@
 use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
 use App\Http\Controllers\Home\IndexController;
+use App\Http\Controllers\Order\FlashSaleController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -32,3 +33,5 @@ Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
 Route::post('chatQWen', [QWenConteroller::class, 'chat']);
 
 Route::get('guestRecord', [IndexController::class, 'guestRecord']);
+
+Route::post('flashSale', [FlashSaleController::class, 'simulationFlashSale']);

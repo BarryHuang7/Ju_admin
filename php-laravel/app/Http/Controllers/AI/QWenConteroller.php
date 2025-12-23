@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Email\SendEmailController;
+use App\Http\Controllers\Common\UtilsController;
 use App\QWenInfo;
 use Illuminate\Support\Facades\Redis;
 use App\Jobs\TaskScheduler;
@@ -31,7 +31,7 @@ class QWenConteroller extends Controller
             ]);
         }
 
-        $ip = (new SendEmailController())->getClientRealIp($request);
+        $ip = (new UtilsController())->getClientRealIp($request);
         $log_msg = "ip:【" . $ip . "】, user_id:【" . $userId . "】, user_name:【" . $userName . "】, messages:【" . $messages . "】";
 
         Log::info($log_msg . ", 正在请求QWen chat。");
