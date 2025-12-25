@@ -15,6 +15,7 @@ use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
 use App\Http\Controllers\Home\IndexController;
 use App\Http\Controllers\Order\FlashSaleController;
+use App\Http\Controllers\Login\LoginController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -26,6 +27,17 @@ use App\Http\Controllers\Order\FlashSaleController;
 //   ]);
 // });
 
+/**
+ * nginx伪静态
+ * location / {
+ *  # 只匹配单层路径，不包含斜杠
+ *  rewrite ^/([a-zA-Z0-9_-]+)$ /index.php?page=$1 last;
+ *  
+ *  # 对于多层路径，使用 Laravel 的 try_files
+ *  try_files $uri $uri/ /index.php?$query_string;
+ * }
+ */
+
 Route::get('runTest', [SendEmailController::class, 'runTest']);
 Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
 // Route::resource('email', 'Email\SendEmailController');
@@ -35,3 +47,10 @@ Route::post('chatQWen', [QWenConteroller::class, 'chat']);
 Route::get('guestRecord', [IndexController::class, 'guestRecord']);
 
 Route::post('flashSale', [FlashSaleController::class, 'simulationFlashSale']);
+
+// 明确区分路由，避免冲突
+Route::prefix('login')->group(function () {
+  Route::post('/verification', [LoginController::class, 'verification'])->name('login.verification');
+  Route::get('/getVerificationCode', [LoginController::class, 'getVerificationCode'])->name('login.getVerificationCode');
+  Route::get('/loginOut', [LoginController::class, 'loginOut'])->name('login.loginOut');
+});

@@ -22,6 +22,7 @@ class VerifyCsrfToken extends Middleware
         'phpApi/*',
         'sendEmail',
         'chatQWen',
-        'flashSale'
+        'flashSale',
+        'login/*',
     ];
 }

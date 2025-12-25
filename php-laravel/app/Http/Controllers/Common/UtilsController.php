@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * 工具类
@@ -96,5 +97,31 @@ class UtilsController extends Controller
         
         // 简化 IPv6 处理（生产环境建议使用专门的 IPv6 处理库）
         return false;
+    }
+
+    /**
+     * 获取加密字符串
+     */
+    public static function getMD5(string $input) {
+        // 获取二进制数据
+        $binaryHash = hash('md5', $input, true);
+        // 转换为 Base64
+        return base64_encode($binaryHash);
+    }
+
+    /**
+     * 获取请求头部 token
+     */
+    public function getHeaderToken(Request $request) {
+        $token = '';
+        $authorization = $request->header('Authorization');
+
+        if ($authorization) {
+            if (Redis::exists($authorization)) {
+                $token = $authorization;
+            }
+        }
+
+        return $token;
     }
 }

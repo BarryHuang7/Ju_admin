@@ -12,7 +12,7 @@ class IndexController extends Controller
     /**
      * 获取访客记录
      */
-    public function guestRecord(Request $request) {
+    public function guestRecord() {
         $year = date('Y');
         $month = date('m');
         $day = date('d');
