@@ -1,4 +1,4 @@
-import { http, httpBlob } from '@/utils/http/axios';
+import { http, httpBlob, httpTwo } from '@/utils/http/axios';
 
 export interface BasicResponseModel<T = any> {
   data: T;
@@ -27,7 +27,7 @@ export function getUserInfo() {
  * @description: 用户登录
  */
 export function login(params, headerVerifyCode) {
-  return http.request<BasicResponseModel>(
+  return httpTwo.request<BasicResponseModel>(
     {
       url: '/login/verification',
       method: 'POST',
@@ -62,7 +62,7 @@ export function changePassword(params, uid) {
  * @description: 用户登出
  */
 export function logout() {
-  return http.request({
+  return httpTwo.request({
     url: '/login/loginOut',
     method: 'GET',
   });

@@ -33,13 +33,17 @@ class LoginController extends Controller
             }
 
             // 生成验证码
+            $builder = new CaptchaBuilder();
+            // 关闭扭曲效果，让字体更清晰
+            $builder->setDistortion(false);
+            // 背景色
+            $builder->setBackgroundColor(255, 255, 255);
+            // 字体色
+            $builder->setTextColor(0, 0, 0);
+            // 宽高
             $width = 80;
             $height = 30;
-            $builder = new CaptchaBuilder();
             $builder->build($width, $height);
-            // 设置干扰线数量
-            $builder->setMaxBehindLines(5);
-            $builder->setMaxFrontLines(5);
             // 获取验证码文本
             $phrase = $builder->getPhrase();
             // 保存redis，1分钟过期
@@ -78,7 +82,7 @@ class LoginController extends Controller
         $password = (new UtilsController())->getMD5($validated['password']);
         $verifyCode = $validated['verifyCode'];
 
-        if ($redisVerifyCode && $verifyCode === $redisVerifyCode) {
+        if ($redisVerifyCode && strtolower($verifyCode) === strtolower($redisVerifyCode)) {
             $user = User::where('name', $name)->where('password', $password)->first();
 
             if ($user) {

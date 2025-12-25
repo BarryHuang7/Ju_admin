@@ -17,10 +17,10 @@
   const simulationFlashSale = (enableIdempotency: boolean) => {
     flashSale({ enableIdempotency })
       .then((res: any) => {
-        if (res.data.code === 200) {
-          window['$message'].success(res.data.msg);
+        if (res.code === 200) {
+          window['$message'].success(res.msg);
         } else {
-          window['$message'].error(res.data.msg);
+          window['$message'].error(res.msg);
         }
       })
       .catch((e: any) => {

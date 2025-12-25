@@ -187,7 +187,7 @@
    */
   const getGuestRecord = () => {
     guestRecord().then((res: any) => {
-      const data: guestRecordDataType = res.data.data;
+      const data: guestRecordDataType = res.data;
 
       if (data) {
         chartTitle.value = data.month + ' 访客记录';

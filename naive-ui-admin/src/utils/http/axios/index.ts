@@ -67,7 +67,7 @@ const transform: AxiosTransform = {
     //  这里 code，result，message为 后台统一的字段，需要修改为项目自己的接口返回格式
     // const { code, result, message } = data;
     const code = data.code;
-    const message = data.message;
+    const message = data?.message || data?.msg;
     // 请求成功
     // const hasSuccess = data && Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
     // 是否显示提示信息
@@ -125,10 +125,11 @@ const transform: AxiosTransform = {
         break;
       // 请求失败
       default:
-        $message.error(errorMsg ?? '请求失败！');
+        // $message.error(errorMsg ?? '请求失败！');
         break;
     }
-    throw new Error(errorMsg);
+    // throw new Error(errorMsg);
+    throw errorMsg;
   },
 
   // 请求之前处理config
@@ -290,14 +291,16 @@ export const http = createAxios();
 // src/api ts 里面接口，就可以单独使用这个请求，
 // import { httpTwo } from '@/utils/http/axios'
 export const httpTwo = createAxios({
+  timeout: 60 * 1000,
+  authenticationScheme: 'Bearer',
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
   requestOptions: {
     apiUrl: globSetting.apiUrl,
     urlPrefix: phpUrlPrefix,
     withToken: true,
-    isReturnNativeResponse: true,
-    isTransformResponse: false,
+    isReturnNativeResponse: false,
+    isTransformResponse: true,
   },
-  // responseType: 'blob',
 });
 
 /**
@@ -305,6 +308,8 @@ export const httpTwo = createAxios({
  */
 export const httpBlob = createAxios({
   requestOptions: {
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: phpUrlPrefix,
     withToken: false,
     isReturnNativeResponse: true,
     isTransformResponse: false,
