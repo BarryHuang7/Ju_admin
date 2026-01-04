@@ -89,4 +89,27 @@ class IndexController extends Controller
         
         return '';
     }
+
+    /**
+     * 获取今日访客数
+     */
+    public function getVisitorNumber() {
+        $date = date('Y-m-d');
+        
+        $number = DB::table(function ($subQuery) use ($date) {
+            $subQuery->select('ip')
+                ->from('login_info')
+                ->where('date', $date)
+                ->where('user_id', '<>', 1)
+                ->groupBy('ip');
+        }, 't')->count();
+
+        return response()->json([
+            'code' => 200,
+            'data' => [
+                'number' => $number
+            ],
+            'msg' => 'Success'
+        ]);
+    }
 }

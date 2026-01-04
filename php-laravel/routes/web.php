@@ -45,6 +45,7 @@ Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
 Route::post('chatQWen', [QWenConteroller::class, 'chat']);
 
 Route::get('guestRecord', [IndexController::class, 'guestRecord']);
+Route::get('getVisitorNumber', [IndexController::class, 'getVisitorNumber']);
 
 Route::post('flashSale', [FlashSaleController::class, 'simulationFlashSale']);
 
@@ -54,3 +55,5 @@ Route::prefix('login')->group(function () {
   Route::get('/getVerificationCode', [LoginController::class, 'getVerificationCode'])->name('login.getVerificationCode');
   Route::get('/loginOut', [LoginController::class, 'loginOut'])->name('login.loginOut');
 });
+
+Route::resource('image', 'File\ImageConteroller');

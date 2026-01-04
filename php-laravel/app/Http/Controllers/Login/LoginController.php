@@ -149,7 +149,7 @@ class LoginController extends Controller
      */
     private function saveVisitorInfo($userId, $userName, $request) {
         try {
-            $loginInfo = LoginInfo::insert([
+            LoginInfo::insert([
                 'user_id' => $userId,
                 'user_name' => $userName,
                 'ip' => (new UtilsController())->getClientRealIp($request),
