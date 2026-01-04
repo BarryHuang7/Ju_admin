@@ -52,10 +52,17 @@ class IndexController extends Controller
                     $series[$key] = $item['number'];
                 }
             }
-
-            $data['xAxis'] = $xAxis;
-            $data['series'] = $series;
+        } else {
+            // 当月查询不到访客记录时，给默认值
+            if (count($xAxis) > 0) {
+                foreach ($xAxis as $k => $x) {
+                    $series[$k] = 0;
+                }
+            }
         }
+
+        $data['xAxis'] = $xAxis;
+        $data['series'] = $series;
 
         return response()->json([
             'code' => 200,
