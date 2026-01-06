@@ -16,6 +16,7 @@ use App\Http\Controllers\AI\QWenConteroller;
 use App\Http\Controllers\Home\IndexController;
 use App\Http\Controllers\Order\FlashSaleController;
 use App\Http\Controllers\Login\LoginController;
+use App\Http\Controllers\File\UploadController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -56,4 +57,6 @@ Route::prefix('login')->group(function () {
   Route::get('/loginOut', [LoginController::class, 'loginOut'])->name('login.loginOut');
 });
 
-Route::resource('image', 'File\ImageConteroller');
+Route::resource('image', 'File\ImageController');
+
+Route::post('uploadFile', [UploadController::class, 'handleUpload']);

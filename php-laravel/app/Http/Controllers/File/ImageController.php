@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\FileList;
 
-class ImageConteroller extends Controller
+class ImageController extends Controller
 {
     /**
      * 获取图片列表
@@ -27,7 +27,7 @@ class ImageConteroller extends Controller
 
         $fields = array('id', 'title', 'content', 'file_name', 'file_url', 'file_date', 'created_at');
         $pageIndex = $request->get('pageIndex', 1);
-        $pageSize = $request->get('pageSize', 10);
+        $pageSize = $request->get('pageSize', 5);
         $where = array();
 
         if (!empty($reqData['title'])) {

@@ -15,22 +15,12 @@ class FlashSaleController extends Controller
      */
     public function simulationFlashSale(Request $request) {
         try {
-            $authorization = $request->header('Authorization');
+            $utils = new UtilsController();
 
-            if (!$authorization) {
-                return response()->json([
-                    'code' => 403,
-                    'msg' => '非法请求！'
-                ]);
-            }
+            $userInfo = $utils->getUserInfo($request);
 
-            $userId = Redis::get($authorization);
-
-            if (!$userId) {
-                return response()->json([
-                    'code' => 403,
-                    'msg' => '非法请求！'
-                ]);
+            if (!$userInfo || !$userInfo['userID']) {
+                $this->returnData(403, '无权访问！');
             }
 
             $input = $request->input();
@@ -50,37 +40,22 @@ class FlashSaleController extends Controller
                 if ($temp) {
                     $this->saveOrder($ip, $userId);
 
-                    return response()->json([
-                        'code' => 200,
-                        'msg' => '下单成功（开启接口幂等性）！'
-                    ]);
+                    $this->returnData(200, '下单成功（开启接口幂等性）！');
                 } else {
-                    return response()->json([
-                        'code' => 500,
-                        'msg' => '请求繁忙，请稍后重试！'
-                    ]);
+                    $this->returnData(500, '请求繁忙，请稍后重试！');
                 }
             } else if ($enableIdempotency === false) {
                 $this->saveOrder($ip, $userId);
 
-                return response()->json([
-                    'code' => 200,
-                    'msg' => '下单成功！'
-                ]);
+                $this->returnData(200, '下单成功！');
             } else {
-                return response()->json([
-                    'code' => 400,
-                    'msg' => '非法请求！'
-                ]);
+                $this->returnData(400, '非法请求！');
             }
         } catch (RequestException $e) {
             $errorMsg = '模拟秒杀请求错误: ' . $e->getMessage();
 
             Log::error($errorMsg);
-            return response()->json([
-                'code' => 500,
-                'msg' => $errorMsg
-            ]);
+            $this->returnData(500, $errorMsg);
         }
     }
 

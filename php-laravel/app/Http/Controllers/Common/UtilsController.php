@@ -124,4 +124,18 @@ class UtilsController extends Controller
 
         return $token;
     }
+
+    /**
+     * 获取当前用户信息
+     */
+    public function getUserInfo(Request $request) {
+        $userInfo = array();
+        $token = $this->getHeaderToken($request);
+
+        if ($token) {
+            $userInfo = json_decode(Redis::get($token), true);
+        }
+
+        return $userInfo;
+    }
 }
