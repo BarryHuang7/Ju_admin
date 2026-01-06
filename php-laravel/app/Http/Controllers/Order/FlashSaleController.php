@@ -23,6 +23,7 @@ class FlashSaleController extends Controller
                 $this->returnData(403, '无权访问！');
             }
 
+            $userID = $userInfo['userID'];
             $input = $request->input();
 
             /**
@@ -33,25 +34,25 @@ class FlashSaleController extends Controller
             $ip = (new UtilsController())->getClientRealIp($request);
 
             if ($enableIdempotency === true) {
-                $temp = Redis::set('simulationFlashSale_' . $userId, json_encode([
+                $temp = Redis::set('simulationFlashSale_' . $userID, json_encode([
                     'status' => true
                 ]), 'EX', 10, 'NX');
 
                 if ($temp) {
-                    $this->saveOrder($ip, $userId);
+                    $this->saveOrder($ip, $userID);
 
                     $this->returnData(200, '下单成功（开启接口幂等性）！');
                 } else {
                     $this->returnData(500, '请求繁忙，请稍后重试！');
                 }
             } else if ($enableIdempotency === false) {
-                $this->saveOrder($ip, $userId);
+                $this->saveOrder($ip, $userID);
 
                 $this->returnData(200, '下单成功！');
             } else {
                 $this->returnData(400, '非法请求！');
             }
-        } catch (RequestException $e) {
+        } catch (\Exception $e) {
             $errorMsg = '模拟秒杀请求错误: ' . $e->getMessage();
 
             Log::error($errorMsg);

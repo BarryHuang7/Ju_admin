@@ -22,7 +22,7 @@ class CreateSendEmailInfoTable extends Migration
             $table->string('ip');
             $table->integer('isSuccessful')->comment('邮箱是否发送成功:1成功,0失败');
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamp('updated_at')->useCurrent();
         });
     }
 

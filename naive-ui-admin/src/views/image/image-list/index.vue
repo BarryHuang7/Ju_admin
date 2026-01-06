@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref, onMounted, reactive, h } from 'vue';
-  import { getFileList, toHttp } from '@/api/table/list';
+  import { getFileList, toHttpByPHP } from '@/api/table/list';
   import { UploadFileInfo, DataTableColumns, NImage, NButton, NPopconfirm } from 'naive-ui';
   import { useUserStoreWidthOut } from '@/store/modules/user';
 
@@ -21,10 +21,10 @@
     id: number;
     title: string;
     content: string;
-    fileName: string;
-    fileDate: null | number;
-    fileUrl: string | null | undefined;
-    createdAt: string;
+    file_name: string;
+    file_date: null | number;
+    file_url: string | null | undefined;
+    created_at: string;
   };
   // 模态框
   const showModal = ref(false);
@@ -37,16 +37,16 @@
     id: 0,
     title: '',
     content: '',
-    fileName: '',
-    fileDate: null,
-    fileUrl: '',
-    createdAt: '',
+    file_name: '',
+    file_date: null,
+    file_url: '',
+    created_at: '',
   });
   // 搜索框数据
   const searchInfo = reactive({
     title: '',
     content: '',
-    fileName: '',
+    file_name: '',
   });
   // 图片信息
   const imgsList = ref<UploadFileInfo[]>([]);
@@ -67,17 +67,17 @@
     },
     {
       title: '图片名称',
-      key: 'fileName',
+      key: 'file_name',
       width: 100,
     },
     {
       title: '图片',
-      key: 'fileUrl',
+      key: 'file_url',
       width: 100,
       render(row: listType) {
         return h(NImage, {
           width: 80,
-          src: `${row.fileUrl}`,
+          src: `${row.file_url}`,
           lazy: true,
           intersectionObserverOptions: { root: '.n-layout-content' },
         });
@@ -85,7 +85,7 @@
     },
     {
       title: '创建时间',
-      key: 'createdAt',
+      key: 'created_at',
       width: 100,
     },
     {
@@ -108,7 +108,7 @@
           h(
             NPopconfirm,
             {
-              onPositiveClick: () => deleteData([row.id]),
+              onPositiveClick: () => deleteData(row.id),
             },
             {
               trigger: () => {
@@ -135,11 +135,9 @@
     const params = {
       pageIndex: dataInfo.pageNo,
       pageSize: dataInfo.pageSize,
-      params: {
-        title: searchInfo.title,
-        content: searchInfo.content,
-        fileName: searchInfo.fileName,
-      },
+      title: searchInfo.title,
+      content: searchInfo.content,
+      file_name: searchInfo.file_name,
     };
     await getFileList(params)
       .then((res) => {
@@ -186,17 +184,17 @@
   // 拼接图片
   const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
     const obj = JSON.parse((event?.target as XMLHttpRequest).response);
-    file.name = `${obj.data || file.name}`;
-    file.url = `${domainAddress}:8077/file/${obj.data}` || null;
-    file.batchId = obj.data.split('.')[0] || null;
+    file.name = `${obj.data.newFileName || file.name}`;
+    file.url = `${domainAddress}:8077/file/${obj.data.newFileName}` || null;
+    file.batchId = obj.data.newFileName.split('.')[0] || null;
     // 给图片赋值
-    modalData.fileUrl = file.url;
+    modalData.file_url = file.url;
     return file;
   };
 
   // 图片删除事件
   const handleRemove = () => {
-    modalData.fileUrl = '';
+    modalData.file_url = '';
   };
 
   // 关闭模态框
@@ -206,22 +204,22 @@
 
   // 新增
   const save = async () => {
-    if (!modalData.fileUrl) {
+    if (!modalData.file_url) {
       window['$message'].error('请上传图片！');
       return false;
     }
 
-    const url = '/h/insertFileListData';
+    const url = '/image';
     const type = 'POST';
     const params: object = {
       title: modalData.title,
       content: modalData.content,
-      fileName: modalData.fileName,
-      fileUrl: modalData.fileUrl,
-      fileDate: modalData.fileDate,
+      file_name: modalData.file_name,
+      file_url: modalData.file_url,
+      file_date: modalData.file_date,
     };
 
-    await toHttp(url, type, params).then((res) => {
+    await toHttpByPHP(url, type, params).then((res) => {
       if (res.code === 200) {
         window['$message'].success('新增成功');
         closeModal();
@@ -234,23 +232,22 @@
 
   // 编辑
   const update = async () => {
-    if (!modalData.fileUrl) {
+    if (!modalData.file_url) {
       window['$message'].error('请上传图片！');
       return false;
     }
 
-    const url = '/h/updateFileListData';
-    const type = 'POST';
+    const url = '/image/' + modalData.id;
+    const type = 'PUT';
     const params: object = {
-      id: modalData.id,
       title: modalData.title,
       content: modalData.content,
-      fileName: modalData.fileName,
-      fileUrl: modalData.fileUrl,
-      fileDate: modalData.fileDate,
+      file_name: modalData.file_name,
+      file_url: modalData.file_url,
+      file_date: modalData.file_date,
     };
 
-    await toHttp(url, type, params).then((res) => {
+    await toHttpByPHP(url, type, params).then((res) => {
       if (res.code === 200) {
         window['$message'].success('编辑成功');
         closeModal();
@@ -262,19 +259,11 @@
   };
 
   // 删除
-  const deleteData = async (idList: Array<number>) => {
-    if (idList.length < 1) {
-      window['$message'].error('参数错误！删除失败！');
-      return false;
-    }
+  const deleteData = async (id: number) => {
+    const url = '/image/' + id;
+    const type = 'DELETE';
 
-    const url = '/h/deleteFileListData';
-    const type = 'POST';
-    const params: object = {
-      fileIdList: idList,
-    };
-
-    await toHttp(url, type, params).then((res) => {
+    await toHttpByPHP(url, type, {}).then((res) => {
       if (res.code === 200) {
         window['$message'].success('删除成功');
         getList();
@@ -303,10 +292,10 @@
     modalData.id = 0;
     modalData.title = '';
     modalData.content = '';
-    modalData.fileName = '';
-    modalData.fileDate = null;
-    modalData.createdAt = '';
-    modalData.fileUrl = '';
+    modalData.file_name = '';
+    modalData.file_date = null;
+    modalData.created_at = '';
+    modalData.file_url = '';
     imgsList.value = [];
 
     // 1新增、2编辑
@@ -321,18 +310,18 @@
         modalData.id = row.id;
         modalData.title = row.title;
         modalData.content = row.content;
-        modalData.fileName = row.fileName;
-        modalData.fileDate = new Date(row.fileDate).getTime();
-        modalData.fileUrl = row.fileUrl;
+        modalData.file_name = row.file_name;
+        modalData.file_date = row.file_date;
+        modalData.file_url = row.file_url;
         imgsList.value = [
           {
-            id: 'fileUrl',
-            name: 'fileUrl.png',
+            id: 'file_url',
+            name: 'file_url.png',
             status: 'finished',
-            url: row.fileUrl,
+            url: row.file_url,
           },
         ];
-        modalData.createdAt = row.createdAt;
+        modalData.created_at = row.created_at;
         showModal.value = true;
         break;
     }
@@ -376,7 +365,7 @@
           <div flex justify-between items-center>
             <span>图片名：</span>
             <n-input
-              v-model:value="searchInfo.fileName"
+              v-model:value="searchInfo.file_name"
               style="width: 160px"
               placeholder=""
               clearable
@@ -442,7 +431,7 @@
           <span ml-5 class="modalTitle">图片名：</span>
           <span flex-1>
             <n-input
-              v-model:value="modalData.fileName"
+              v-model:value="modalData.file_name"
               style="width: 80%"
               placeholder="请输入图片名"
             />
@@ -452,9 +441,10 @@
           <span ml-5 class="modalTitle">图片时间：</span>
           <span flex-1>
             <n-date-picker
-              v-model:value="modalData.fileDate"
+              v-model:formatted-value="modalData.file_date"
+              value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 80%"
-              type="date"
+              type="datetime"
               clearable
             />
           </span>
@@ -464,7 +454,7 @@
           <span class="modalTitle">上传图片：</span>
           <span inline-block style="width: 45%">
             <n-upload
-              :action="`${domainAddress}:8080/api/h/uploadFile`"
+              :action="`${domainAddress}:8080/phpApi/uploadFile`"
               :headers="{
                 Authorization: `Bearer ${token}`,
               }"

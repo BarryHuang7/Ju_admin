@@ -22,7 +22,7 @@ class CreateQwenInfoTable extends Migration
             $table->text('assistant_content')->nullable()->comment('模型输出的消息内容');
             $table->longText('assistant_response_body')->nullable()->comment('模型输出的完整响应体');
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamp('updated_at')->useCurrent();
         });
     }
 

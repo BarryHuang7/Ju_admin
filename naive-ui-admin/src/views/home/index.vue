@@ -15,21 +15,24 @@
       <span c-green>
         <n-number-animation :from="0" :to="todayNumberOfLogins" />
       </span>
-      <template #suffix>人（包括admin）</template>
+      <template #suffix>人</template>
     </n-statistic>
 
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
         <div>
-          <div class="mt-20">Java</div>
-          <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
+          <div class="mt-20">
+            <span>Java</span>
+            <span class="text-[red]">（正在改成PHP接口，功能不可用）</span>
+          </div>
           <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">
             Java WebSocket
           </n-button>
         </div>
         <div>
-          <div class="mt-20">PHP</div>
+          <div class="mt-20">PHP Laravel</div>
+          <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
           <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10"
             >Swoole WebSocket</n-button
           >
@@ -52,7 +55,7 @@
 
 <script lang="ts" setup>
   import { ref, reactive, onMounted, computed } from 'vue';
-  import { toHttp } from '@/api/table/list';
+  import { toHttpByPHP } from '@/api/table/list';
   import { guestRecord } from '@/api/php/home';
   import { useRouter } from 'vue-router';
   import { use } from 'echarts/core';
@@ -148,10 +151,10 @@
    * 获取今日访客数
    */
   const getVisitorNumber = async () => {
-    const url = '/h/getVisitorNumber';
+    const url = '/getVisitorNumber';
     const type = 'GET';
 
-    await toHttp(url, type).then((res) => {
+    await toHttpByPHP(url, type).then((res) => {
       todayNumberOfLogins.value = res.data.number || 0;
     });
   };

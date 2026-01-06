@@ -25,7 +25,7 @@ class CreateFileListTable extends Migration
             $table->dateTime('file_date')->nullable();
             $table->integer('is_admin')->nullable()->default(0);
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('update_at')->nullable();
+            $table->timestamp('updated_at')->useCurrent();
         });
     }
 

@@ -103,8 +103,8 @@ const transform: AxiosTransform = {
       case 404:
         $message.error(errorMsg ?? '你无权访问！');
         break;
-      // 登录超时
-      case 401:
+      // 未登录或超时
+      case 403:
         const LoginName = PageEnum.BASE_LOGIN_NAME;
         const LoginPath = PageEnum.BASE_LOGIN;
         if (router.currentRoute.value?.name === LoginName) return;
@@ -300,6 +300,7 @@ export const httpTwo = createAxios({
     withToken: true,
     isReturnNativeResponse: false,
     isTransformResponse: true,
+    joinTime: true,
   },
 });
 

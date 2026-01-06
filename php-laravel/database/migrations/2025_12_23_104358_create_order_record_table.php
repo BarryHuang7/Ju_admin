@@ -24,7 +24,7 @@ class CreateOrderRecordTable extends Migration
             $table->integer('stock')->comment('入库数');
             $table->text('remark')->nullable()->comment('备注');
             $table->timestamp('created_at')->useCurrent()->comment('创建时间');
-            $table->timestamp('updated_at')->nullable()->comment('更新时间');
+            $table->timestamp('updated_at')->useCurrent()->comment('更新时间');
             // 索引
             $table->unique('id');
             $table->index('user_id');
