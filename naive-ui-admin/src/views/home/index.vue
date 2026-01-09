@@ -21,29 +21,21 @@
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
-        <div>
-          <div class="mt-20">
-            <span>Java</span>
-            <span class="text-[red]">（正在改成PHP接口，功能不可用）</span>
-          </div>
-          <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">
-            Java WebSocket
-          </n-button>
-        </div>
-        <div>
-          <div class="mt-20">PHP Laravel</div>
-          <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
-          <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10"
-            >Swoole WebSocket</n-button
-          >
-          <n-button type="info" @click="skip(4)" class="mt-20 md:mt-10 mr-10">发送邮箱</n-button>
-          <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
-            通义千问chat
-          </n-button>
-          <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
-            模拟商品秒杀
-          </n-button>
-        </div>
+        <div class="mt-20">PHP Laravel</div>
+        <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
+        <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">聊天室</n-button>
+        <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10">直播弹幕</n-button>
+        <n-button type="info" @click="skip(4)" class="mt-20 md:mt-10 mr-10">发送邮箱</n-button>
+        <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
+          通义千问chat
+        </n-button>
+        <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
+          模拟商品秒杀
+        </n-button>
+        <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">
+          视频
+          <span class="text-[chartreuse]">（开发中）</span>
+        </n-button>
       </div>
     </div>
 
@@ -168,10 +160,10 @@
         router.push('/image/image-list');
         break;
       case 2:
-        router.push('/websocket/websocket-index');
+        router.push('/websocket/chat-room');
         break;
       case 3:
-        router.push('/swoole/swoole-websocket');
+        router.push('/websocket/bullet-chat');
         break;
       case 4:
         router.push('/email/index');
@@ -181,6 +173,9 @@
         break;
       case 6:
         router.push('/order/index');
+        break;
+      case 7:
+        router.push('/video/vido-upload');
         break;
     }
   };

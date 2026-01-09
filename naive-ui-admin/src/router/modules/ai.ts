@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: 'AI',
       icon: renderIcon(RobotOutlined),
-      sort: 6,
+      sort: 7,
     },
     children: [
       {

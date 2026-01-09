@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Common;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * 工具类
@@ -137,5 +139,39 @@ class UtilsController extends Controller
         }
 
         return $userInfo;
+    }
+
+    /**
+     * 发送 WebSocket 消息
+     */
+    public function sendWebSocketMessage($userName, $userId, $content) {
+        try {
+            $client = new Client([
+                // 禁用 SSL 验证
+                'verify' => false,
+                'timeout' => 20
+            ]);
+
+            $client->request(
+                'POST',
+                '127.0.0.1:9502/websocket/notice',
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json'
+                    ],
+                    'json' => [
+                        'user_name' => $userName,
+                        'user_id' => $userId,
+                        'content' => $content
+                    ]
+                ]
+            );
+
+            return true;
+        } catch (RequestException $e) {
+            Log::error('发送消息请求错误: ' . $e->getMessage());
+        }
+
+        return false;
     }
 }

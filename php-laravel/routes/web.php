@@ -17,6 +17,7 @@ use App\Http\Controllers\Home\IndexController;
 use App\Http\Controllers\Order\FlashSaleController;
 use App\Http\Controllers\Login\LoginController;
 use App\Http\Controllers\File\UploadController;
+use App\Http\Controllers\Websocket\ChatConteroller;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -60,3 +61,7 @@ Route::prefix('login')->group(function () {
 Route::resource('image', 'File\ImageController');
 
 Route::post('uploadFile', [UploadController::class, 'handleUpload']);
+
+Route::get('/getAllOnlineUser', [ChatConteroller::class, 'getAllOnlineUser']);
+Route::post('/sendMessage', [ChatConteroller::class, 'sendMessage']);
+Route::post('/sendTimingMessage', [ChatConteroller::class, 'sendTimingMessage']);

@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { ThunderboltFilled } from '@vicons/antd';
+import { PlayCircleOutlined } from '@vicons/antd';
 import { renderIcon } from '@/utils/index';
 
 /**
@@ -16,23 +16,23 @@ import { renderIcon } from '@/utils/index';
  * */
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/order',
-    name: 'order',
-    redirect: '/order/index',
+    path: '/video',
+    name: 'video',
+    redirect: '/video/vido-upload',
     component: Layout,
     meta: {
-      title: '订单',
-      icon: renderIcon(ThunderboltFilled),
-      sort: 8,
+      title: 'Video',
+      icon: renderIcon(PlayCircleOutlined),
+      sort: 9,
     },
     children: [
       {
-        path: 'index',
-        name: 'order-index',
+        path: 'vido-upload',
+        name: 'vido-upload',
         meta: {
-          title: '模拟商品秒杀',
+          title: '视频上传',
         },
-        component: () => import('@/views/order/index.vue'),
+        component: () => import('@/views/video/index.vue'),
       },
     ],
   },

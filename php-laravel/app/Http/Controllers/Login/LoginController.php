@@ -93,7 +93,11 @@ class LoginController extends Controller
                 $this->saveVisitorInfo($userId, $userName, $request);
                 $token = $this->getToken($userId, $userName);
                 // 保存redis，2小时过期
-                Redis::setex('Bearer ' . $token, 60 * 60 * 2, json_encode([ 'userID' => $userId, 'isAdmin' => $isAdmin ]));
+                Redis::setex('Bearer ' . $token, 60 * 60 * 2, json_encode([
+                    'userID' => $userId,
+                    'userName' => $userName,
+                    'isAdmin' => $isAdmin
+                ]));
 
                 return response()->json([
                     'code' => 200,

@@ -10,13 +10,14 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
+use App\Http\Controllers\Common\UtilsController;
 
 class TaskScheduler implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * 任务类型：1发送邮件，2调用通义千问API
+     * 任务类型：1发送邮件，2调用通义千问API，3发送websocket消息
      */
     protected $type;
     /**
@@ -76,6 +77,9 @@ class TaskScheduler implements ShouldQueue
                     break;
                 case 2:
                     (new QWenConteroller)->handQWenAPI($this->data, $this->ip);
+                    break;
+                case 3:
+                    (new UtilsController)->sendWebSocketMessage($this->data['user_name'], $this->data['user_id'], $this->data['message']);
                     break;
                 default:
                     Log::error("队列日志", [

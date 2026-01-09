@@ -2,7 +2,9 @@
   <div mt-20>
     <n-space vertical :size="12" mb-20>
       <n-alert title="功能说明" type="info">
-        <span>首先点击</span>
+        <span>本功能使用</span>
+        <span class="high-light" cursor-pointer>Swoole WebSocket</span>
+        <span>实现，首先点击</span>
         <span class="high-light" cursor-pointer>连接服务器</span>
         <span>按钮，然后点击</span>
         <span class="high-light" cursor-pointer>获取所有在线用户</span>
@@ -28,13 +30,13 @@
           <n-tag
             v-for="(item, index) in onlineUserList"
             :key="index"
-            :type="selectUserId === item.userId ? 'success' : undefined"
+            :type="selectUserId === item.user_id ? 'success' : undefined"
             @click="selectUser(item)"
             p-10
             cursor-pointer
             title="选中与他对话"
           >
-            {{ item.userName }}
+            {{ item.user_name }}
           </n-tag>
         </n-space>
       </div>
@@ -45,7 +47,7 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { useUserStore } from '@/store/modules/user';
-  import { toHttp } from '@/api/table/list';
+  import { toHttpByPHP } from '@/api/table/list';
 
   const ws = ref<WebSocket>();
   const userStore = useUserStore();
@@ -54,8 +56,8 @@
   const message = ref('');
 
   interface onlineUserType {
-    userId: string;
-    userName: string;
+    user_id: string;
+    user_name: string;
   }
   const onlineUserList = ref<onlineUserType[]>([]);
   const selectUserId = ref('');
@@ -65,7 +67,7 @@
   const linkServer = () => {
     if (userInfo) {
       ws.value = new WebSocket(
-        `ws://110.41.16.194:8080/api/websocket/${userInfo['id']}/${userInfo['name']}`
+        `ws://110.41.16.194:9502/websocket/${userInfo['name']}/${userInfo['id']}`
       );
 
       ws.value.onopen = () => {
@@ -82,12 +84,13 @@
       ws.value.onmessage = (msg) => {
         const data = JSON.parse(msg.data);
 
-        if (data) {
-          if (data.message) {
-            window['$message'].info(`服务器给你发信息：${data.message}`);
-          } else if (data.data) {
-            const info = data.data;
-            window['$message'].info(`【${info.sendUserName}】对你说：${info.message}`);
+        if (data && data.content) {
+          const info = JSON.parse(data.content);
+
+          if (info.type === 'TimingMessage') {
+            window['$message'].info(`服务器给你发信息：${info.message}`);
+          } else if (info.type === 'Message') {
+            window['$message'].info(`【${info.send_user_name}】对你说：${info.message}`);
           }
         }
       };
@@ -112,7 +115,12 @@
     if (ws.value && ws.value.readyState === 1) {
       if (!selectUserId.value) {
         if (type === 1 && message.value) {
-          ws.value.send(message.value);
+          ws.value.send(
+            JSON.stringify({
+              type: 2,
+              message: message.value,
+            })
+          );
           message.value = '';
         } else if (type === 2) {
           window['$message'].info('正在发送消息...服务器会在5秒后回复你');
@@ -141,28 +149,28 @@
   // 服务器发送定时消息
   const sendTimingMessage = async () => {
     if (userInfo) {
-      const url = '/h/sendTimingMessage';
+      const url = '/sendTimingMessage';
       const type = 'POST';
       const params: object = {};
 
-      await toHttp(url, type, params);
+      await toHttpByPHP(url, type, params);
     }
   };
 
   // 发送给指定用户消息
   const sendCustomizeMessage = async () => {
     if (userInfo) {
-      const url = '/h/sendMessage';
+      const url = '/sendMessage';
       const type = 'POST';
       const params: object = {
-        userId: selectUserId.value,
-        userName: selectUserName.value,
+        user_id: selectUserId.value,
+        user_name: selectUserName.value,
         message: message.value,
-        sendUserId: userInfo['id'],
-        sendUserName: userInfo['name'],
+        send_user_id: userInfo['id'],
+        send_user_name: userInfo['name'],
       };
 
-      await toHttp(url, type, params);
+      await toHttpByPHP(url, type, params);
       message.value = '';
     }
   };
@@ -170,10 +178,10 @@
   // 获取所有在线用户信息
   const getAllOnlineUser = async () => {
     if (userInfo) {
-      const url = '/h/getAllOnlineUser';
+      const url = '/getAllOnlineUser';
       const type = 'GET';
 
-      await toHttp(url, type).then((res) => {
+      await toHttpByPHP(url, type).then((res) => {
         const online = ws.value && ws.value.readyState === 1 ? 1 : 0;
         window['$message'].info('在线人数：' + (res.data.length + online) + '人');
         onlineUserList.value = res.data || [];
@@ -183,12 +191,12 @@
 
   // 选择在线用户发送消息
   const selectUser = (item: onlineUserType) => {
-    if (selectUserId.value === item.userId) {
+    if (selectUserId.value === item.user_id) {
       selectUserId.value = '';
       selectUserName.value = '';
     } else {
-      selectUserId.value = item.userId;
-      selectUserName.value = item.userName;
+      selectUserId.value = item.user_id;
+      selectUserName.value = item.user_name;
     }
   };
 </script>

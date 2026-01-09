@@ -23,6 +23,23 @@ class Swoole extends Command
     protected $description = 'Command description';
 
     /**
+     * 
+     */
+    protected $thisFD;
+    /**
+     * 用户信息 redis key
+     */
+    protected $userInfoKey = 'php_websocket_userInfo';
+    /**
+     * 连接fd redis key
+     */
+    protected $fdKey = 'php_websocket_fd';
+    /**
+     * 在线用户集合 redis key
+     */
+    protected $onlineUserKey = 'php_websocket_onlineUsers';
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -60,15 +77,18 @@ class Swoole extends Command
 
         // 监听WebSocket连接打开事件
         $this->ws->on('open', function ($ws, $request) {
-            $fd = $request->fd;
+            $this->thisFD = $request->fd;
             $path = $request->server['request_uri'] ? $request->server['request_uri'] : '/';
             $params = $this->parsePath($path);
 
             if ($params['user_name'] && $params['user_id']) {
-                // 2小时过期，节省资源
-                // ex过期3600秒，nx不存在才创建返回true Redis::set($key, json_encode($data), 'EX', 3600, 'NX');
-                Redis::setex('PHP_Redis_WebSocket_' . $params['user_name'] . '_' . $params['user_id'], 7200, $fd);
-                Redis::setex('PHP_Redis_FD_' . $fd, 7200, json_encode([
+                Redis::hset($this->userInfoKey, $params['user_name'] . '_' . $params['user_id'], $this->thisFD);
+                Redis::hset($this->fdKey, $this->thisFD, json_encode([
+                    'user_name' => $params['user_name'],
+                    'user_id' => $params['user_id']
+                ]));
+                Redis::sadd($this->onlineUserKey, json_encode([
+                    'fd' => $this->thisFD,
                     'user_name' => $params['user_name'],
                     'user_id' => $params['user_id']
                 ]));
@@ -77,11 +97,36 @@ class Swoole extends Command
 
         // 监听WebSocket消息事件
         $this->ws->on('message', function ($ws, $frame) {
-            // 群发弹幕
-            foreach ($this->ws->connections as $fd) {
-                if ($this->ws->isEstablished($fd)) {
-                    $this->ws->push($fd, $frame->data);
-                }
+            $data = json_decode($frame->data, true);
+            /**
+             * 消息类型：1群发，2私发
+             */
+            $type = $data['type'];
+
+            switch ($type) {
+                // 群发弹幕
+                case 1:
+                    foreach ($this->ws->connections as $fd) {
+                        if ($this->ws->isEstablished($fd)) {
+                            $this->ws->push($fd, $frame->data);
+                        }
+                    }
+                    break;
+                // 单独发给某人
+                case 2:
+                    if ($this->ws->isEstablished($this->thisFD)) {
+                        $this->ws->push(
+                            $this->thisFD,
+                            json_encode([
+                                'type' => 2,
+                                'content' => json_encode([
+                                    'type' => 'TimingMessage',
+                                    'message' => "你输入了：" . $data['message']
+                                ])
+                            ], JSON_UNESCAPED_UNICODE)
+                        );
+                    }
+                    break;
             }
         });
 
@@ -107,7 +152,7 @@ class Swoole extends Command
                         $finish_reason = isset($postData['finish_reason']) ? $postData['finish_reason'] : '';
 
                         if ($userName && $userId && ($content || $finish_reason)) {
-                            $fd = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
+                            $fd = Redis::hget($this->userInfoKey, $userName . '_' . $userId);
 
                             if ($fd && $this->ws->isEstablished($fd)) {
                                 $this->ws->push($fd, json_encode([
@@ -135,7 +180,7 @@ class Swoole extends Command
                         $content = isset($postData['content']) ? $postData['content'] : '';
 
                         if ($userName && $userId && $content) {
-                            $fd = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
+                            $fd = Redis::hget($this->userInfoKey, $userName . '_' . $userId);
 
                             if ($fd && $this->ws->isEstablished($fd)) {
                                 $this->ws->push($fd, json_encode([
@@ -159,13 +204,18 @@ class Swoole extends Command
 
         // 监听WebSocket连接关闭事件
         $this->ws->on('close', function ($ws, $fd) {
-            $userInfoJson = Redis::get('PHP_Redis_FD_' . $fd);
+            $userInfoJson = Redis::hget($this->fdKey, $fd);
 
             if ($userInfoJson) {
                 $userInfo = json_decode($userInfoJson, true);
 
-                Redis::del('PHP_Redis_WebSocket_' . $userInfo['user_name'] . '_' . $userInfo['user_id']);
-                Redis::del('PHP_Redis_FD_' . $fd);
+                Redis::hdel($this->userInfoKey, $userInfo['user_name'] . '_' . $userInfo['user_id']);
+                Redis::hdel($this->fdKey, $fd);
+                Redis::srem($this->onlineUserKey, json_encode([
+                    'fd' => $fd,
+                    'user_name' => $userInfo['user_name'],
+                    'user_id' => $userInfo['user_id']
+                ]));
             }
         });
 

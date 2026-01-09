@@ -16,13 +16,16 @@ class QWenConteroller extends Controller
 {
     // php artisan make:controller AI/QWenConteroller
 
+    /**
+     * 调用通义千问API
+     */
     public function chat(Request $request) {
         $input = $request->input();
         $userId = isset($input['user_id']) ? $input['user_id'] : '';
         $userName = isset($input['user_name']) ? $input['user_name'] : '';
         $messages = isset($input['messages']) ? $input['messages'] : '';
 
-        $websocketId = Redis::get('PHP_Redis_WebSocket_' . $userName . '_' . $userId);
+        $websocketId = Redis::hget('php_webSocket_userInfo', $userName . '_' . $userId);
 
         if (!$websocketId) {
             return response()->json([

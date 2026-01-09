@@ -2,7 +2,9 @@
   <div mt-20>
     <n-space vertical :size="12" mb-20>
       <n-alert title="功能说明" type="info">
-        <span>进页面就会</span>
+        <span>本功能使用</span>
+        <span class="high-light" cursor-pointer>Swoole WebSocket</span>
+        <span>实现，进页面就会</span>
         <span class="high-light">连接服务器</span>
         <span>，</span>
         <span class="high-light">在线用户</span>
@@ -127,6 +129,8 @@
   const sendMessage = () => {
     if (message.value) {
       const msg_json = {
+        // 群发
+        type: 1,
         name: userInfo['name'],
         msg: message.value,
         color: barrageData.color,

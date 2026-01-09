@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
-import { LinkOutlined } from '@vicons/antd';
+import { MessageOutlined } from '@vicons/antd';
 import { renderIcon } from '@/utils/index';
 
 /**
@@ -17,20 +17,20 @@ import { renderIcon } from '@/utils/index';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/websocket',
-    name: 'Websocket',
-    redirect: '/websocket/websocket-index',
+    name: 'Chat Room',
+    redirect: '/websocket/chat-room',
     component: Layout,
     meta: {
-      title: 'WebSocket',
-      icon: renderIcon(LinkOutlined),
-      sort: 3,
+      title: 'Swoole WebSocket',
+      icon: renderIcon(MessageOutlined),
+      sort: 4,
     },
     children: [
       {
-        path: 'websocket-index',
-        name: 'websocket-index',
+        path: 'chat-room',
+        name: 'chat-room',
         meta: {
-          title: 'WebSocket',
+          title: '聊天室',
         },
         component: () => import('@/views/websocket/index.vue'),
       },
