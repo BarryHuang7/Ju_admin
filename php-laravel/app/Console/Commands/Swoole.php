@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use swoole_websocket_server;
+use Swoole\WebSocket\Server as WebSocketServer;
 use Illuminate\Support\Facades\Redis;
 
 class Swoole extends Command
@@ -23,7 +23,11 @@ class Swoole extends Command
     protected $description = 'Command description';
 
     /**
-     * 
+     * 服务器实例
+     */
+    protected $ws;
+    /**
+     * 当前连接
      */
     protected $thisFD;
     /**
@@ -40,19 +44,7 @@ class Swoole extends Command
     protected $onlineUserKey = 'php_websocket_onlineUsers';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
-     *
-     * @return mixed
      */
     public function handle()
     {
@@ -67,13 +59,26 @@ class Swoole extends Command
     }
 
     /**
+     * （等待验证）运行octane：守护进程、监听端口 php artisan octane:start --daemon --port=8000
      * php artisan swoole start& // &常驻后台
      * ps aux | grep "artisan swoole start"
      */
     public function start()
     {
         // 这里是监听的服务端口号
-        $this->ws = new swoole_websocket_server("0.0.0.0", 9502);
+        $this->ws = new WebSocketServer("0.0.0.0", 9502);
+
+        $this->ws->set([
+            'worker_num' => 1,
+            'daemonize' => false,
+            'log_file' => storage_path('logs/swoole.log'),
+        ]);
+
+        // 监听WebSocket服务启动事件
+        // $this->ws->on('start', function($server) {
+        //     echo "WebSocket 服务器启动成功!\n";
+        //     echo "主进程PID: {$server->master_pid}\n";
+        // });
 
         // 监听WebSocket连接打开事件
         $this->ws->on('open', function ($ws, $request) {

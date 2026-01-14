@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Common\UtilsController;
-use App\QWenInfo;
+use App\Models\QWenInfo;
 use Illuminate\Support\Facades\Redis;
 use App\Jobs\TaskScheduler;
 
@@ -25,7 +25,7 @@ class QWenConteroller extends Controller
         $userName = isset($input['user_name']) ? $input['user_name'] : '';
         $messages = isset($input['messages']) ? $input['messages'] : '';
 
-        $websocketId = Redis::hget('php_webSocket_userInfo', $userName . '_' . $userId);
+        $websocketId = Redis::hget('php_websocket_userInfo', $userName . '_' . $userId);
 
         if (!$websocketId) {
             return response()->json([

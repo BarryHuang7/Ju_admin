@@ -1,15 +1,6 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
@@ -18,15 +9,10 @@ use App\Http\Controllers\Order\FlashSaleController;
 use App\Http\Controllers\Login\LoginController;
 use App\Http\Controllers\File\UploadController;
 use App\Http\Controllers\Websocket\ChatConteroller;
+use App\Http\Controllers\File\ImageController;
 
 // Route::get('/', function () {
 //     return view('welcome');
-// });
-
-// Route::get('/get-csrf-token', function() {
-//   return response()->json([
-//     'csrf_token' => csrf_token()
-//   ]);
 // });
 
 /**
@@ -42,7 +28,6 @@ use App\Http\Controllers\Websocket\ChatConteroller;
 
 Route::get('runTest', [SendEmailController::class, 'runTest']);
 Route::post('sendEmail', [SendEmailController::class, 'sendEmail']);
-// Route::resource('email', 'Email\SendEmailController');
 
 Route::post('chatQWen', [QWenConteroller::class, 'chat']);
 
@@ -58,7 +43,7 @@ Route::prefix('login')->group(function () {
   Route::get('/loginOut', [LoginController::class, 'loginOut'])->name('login.loginOut');
 });
 
-Route::resource('image', 'File\ImageController');
+Route::resource('image', ImageController::class);
 
 Route::post('uploadFile', [UploadController::class, 'handleUpload']);
 

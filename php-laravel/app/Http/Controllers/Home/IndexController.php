@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\LoginInfo;
+use App\Models\LoginInfo;
 use Illuminate\Support\Facades\DB;
 
 class IndexController extends Controller

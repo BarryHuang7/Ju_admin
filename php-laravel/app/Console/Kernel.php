@@ -8,31 +8,26 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     /**
-     * The Artisan commands provided by your application.
+     * 注册应用中的命令
      *
      * @var array
      */
     protected $commands = [
-        // swoole
+        // swoole websocket
         \App\Console\Commands\Swoole::class,
     ];
 
     /**
-     * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
+     * 定义命令调度
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // 定时任务
+        // $schedule->command('inspire')->hourly();
     }
 
     /**
-     * Register the commands for the application.
-     *
-     * @return void
+     * 注册命令
      */
     protected function commands()
     {

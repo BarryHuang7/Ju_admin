@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Login;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\User;
-use App\LoginInfo;
+use App\Models\User;
+use App\Models\LoginInfo;
 use Ramsey\Uuid\Uuid;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\File;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Common\UtilsController;
-use App\FileList;
+use App\Models\FileList;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 

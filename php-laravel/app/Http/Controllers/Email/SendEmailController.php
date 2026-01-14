@@ -12,7 +12,7 @@ use App\Jobs\TaskScheduler;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use App\SendEmailInfo;
+use App\Models\SendEmailInfo;
 use App\Http\Controllers\Common\UtilsController;
 
 class SendEmailController extends Controller

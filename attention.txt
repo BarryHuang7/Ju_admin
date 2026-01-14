@@ -1,0 +1,30 @@
+使用PHP Study安装php8.2版本是需要而外下载redis 地址：https://pecl.php.net/package/redis
+php.ini配置修改加上 extension_dir = "ext"
+完整配置
+[PHP]
+extension_dir = "ext"
+extension=php_zip
+extension=php_gd
+extension=php_pdo_mysql
+extension=php_mysqli
+extension=php_fileinfo
+extension=php_curl
+extension=php_openssl
+memory_limit=256M
+upload_max_filesize=100M
+post_max_size=100M
+display_errors=Off
+display_startup_errors=Off
+log_errors=Off
+track_errors=Off
+html_errors=Off
+allow_url_fopen=On
+allow_url_include=Off
+max_execution_time=300
+max_input_time=60
+max_input_vars=3000
+max_file_uploads=20
+[Redis]
+extension=php_redis
+[Date]
+date.timezone=Asia/Shanghai
