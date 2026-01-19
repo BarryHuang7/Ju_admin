@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateSendEmailInfoTable extends Migration
 {
+    // php artisan migrate
     // php artisan make:migration create_send_email_info_table
     // php artisan migrate --path=/database/migrations/2025_12_08_062039_create_send_email_info_table.php
 

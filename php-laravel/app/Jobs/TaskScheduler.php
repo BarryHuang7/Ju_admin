@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Email\SendEmailController;
 use App\Http\Controllers\AI\QWenConteroller;
 use App\Http\Controllers\Common\UtilsController;
+use App\Http\Controllers\File\UploadController;
 
 class TaskScheduler implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * 任务类型：1发送邮件，2调用通义千问API，3发送websocket消息
+     * 任务类型：1发送邮件，2调用通义千问API，3发送websocket消息，4合并视频
      */
     protected $type;
     /**
@@ -80,6 +81,9 @@ class TaskScheduler implements ShouldQueue
                     break;
                 case 3:
                     (new UtilsController)->sendWebSocketMessage($this->data['user_name'], $this->data['user_id'], $this->data['message']);
+                    break;
+                case 4:
+                    (new UploadController)->handleMergeChunks($this->data['video']);
                     break;
                 default:
                     Log::error("队列日志", [

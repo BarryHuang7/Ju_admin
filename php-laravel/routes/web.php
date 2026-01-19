@@ -10,6 +10,7 @@ use App\Http\Controllers\Login\LoginController;
 use App\Http\Controllers\File\UploadController;
 use App\Http\Controllers\Websocket\ChatConteroller;
 use App\Http\Controllers\File\ImageController;
+use App\Http\Controllers\File\VideoConteroller;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -47,6 +48,9 @@ Route::resource('image', ImageController::class);
 
 Route::post('uploadFile', [UploadController::class, 'handleUpload']);
 
-Route::get('/getAllOnlineUser', [ChatConteroller::class, 'getAllOnlineUser']);
-Route::post('/sendMessage', [ChatConteroller::class, 'sendMessage']);
-Route::post('/sendTimingMessage', [ChatConteroller::class, 'sendTimingMessage']);
+Route::get('getAllOnlineUser', [ChatConteroller::class, 'getAllOnlineUser']);
+Route::post('sendMessage', [ChatConteroller::class, 'sendMessage']);
+Route::post('sendTimingMessage', [ChatConteroller::class, 'sendTimingMessage']);
+
+Route::post('videoInitiate', [VideoConteroller::class, 'videoInitiate']);
+Route::post('handleUploadChunk/{uuid}', [UploadController::class, 'handleUploadChunk']);
