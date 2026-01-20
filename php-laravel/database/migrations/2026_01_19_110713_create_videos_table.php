@@ -28,6 +28,7 @@ return new class extends Migration
             // $table->string('thumbnail_path')->nullable()->comment('缩略图路径');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
+            $table->softDeletes();
 
             $table->index('uuid');
             $table->index('status');

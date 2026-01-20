@@ -295,4 +295,37 @@ class UploadController extends Controller
             $video->save();
         }
     }
+
+    /**
+     * 取消上传视频
+     */
+    public function cancelUploadVideo(string $uuid) {
+        $video = Video::where('uuid', $uuid)->firstOrFail();
+
+        $tempDir = self::$filePath . '/temp' . '/' . $uuid;
+
+        if (is_dir($tempDir)) {
+            $files = glob($tempDir . '/*.part');
+
+            // 清理临时文件
+            foreach ($files as $file) {
+                unlink($file);
+            }
+
+            if (is_dir($tempDir)) {
+                rmdir($tempDir);
+            }
+
+            // 软删除
+            if ($video->delete()) {
+                $this->returnData(200, '上传已取消！');
+            } else {
+                $this->returnData(500, '数据删除失败！', [
+                    'uuid' => $uuid
+                ]);
+            }
+        }
+
+        $this->returnData(500, '取消失败！');
+    }
 }

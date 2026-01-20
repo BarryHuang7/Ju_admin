@@ -87,4 +87,24 @@ class VideoConteroller extends Controller
             $this->returnData(500, $errorMsg);
         }
     }
+
+    /**
+     * 获取视频上传进度
+     */
+    public function getVideoProgress(string $uuid) {
+        $video = Video::where('uuid', $uuid)->firstOrFail();
+        
+        $uploadedChunks = count(json_decode($video->chunks, true) ?? []);
+        $progress = $video->total_chunks > 0 
+            ? round(($uploadedChunks / $video->total_chunks) * 100, 2)
+            : 0;
+
+        $this->returnData(200, 'Success!', [
+            'uuid' => $uuid,
+            'status' => $video->status,
+            'progress' => $progress,
+            'uploaded_chunks' => $uploadedChunks,
+            'total_chunks' => $video->total_chunks
+        ]);
+    }
 }

@@ -54,3 +54,5 @@ Route::post('sendTimingMessage', [ChatConteroller::class, 'sendTimingMessage']);
 
 Route::post('videoInitiate', [VideoConteroller::class, 'videoInitiate']);
 Route::post('handleUploadChunk/{uuid}', [UploadController::class, 'handleUploadChunk']);
+Route::get('getVideoProgress/{uuid}', [VideoConteroller::class, 'getVideoProgress']);
+Route::get('cancelUploadVideo/{uuid}', [UploadController::class, 'cancelUploadVideo']);
