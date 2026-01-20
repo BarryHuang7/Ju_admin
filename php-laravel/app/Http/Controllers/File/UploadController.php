@@ -104,7 +104,11 @@ class UploadController extends Controller
         );
 
         // firstOrFail没有直接404
-        $video = Video::where('uuid', $uuid)->firstOrFail();
+        $video = Video::where('uuid', $uuid)->first();
+
+        if (!$video) {
+            $this->returnData(400, '视频信息不存在！');
+        }
 
         $totalChunks = $video->total_chunks;
 
@@ -120,12 +124,7 @@ class UploadController extends Controller
         $errorMsg = '';
 
         try {
-            // 判断文件夹存不存在
             $tempDir = self::$filePath . '/temp' . '/' . $uuid;
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0755, true);
-            }
-
             $chunk = $reqData['chunk'];
             $chunkNumber = $reqData['chunk_number'];
             $chunkFileName = sprintf('%04d', $chunkNumber) . '.part';
@@ -178,7 +177,7 @@ class UploadController extends Controller
             }
 
             $this->returnData(200, '分片上传成功', [
-                'chunk_number' => $chunkNumber,
+                'chunk_number' => (int) $chunkNumber,
                 'uploaded_chunks' => $uploadedChunks,
                 'total_chunks' => $totalChunks,
                 'all_uploaded' => $allUploaded
@@ -187,6 +186,17 @@ class UploadController extends Controller
             $errorMsg = '分片上传文件失败: ' . $e->getMessage();
             Log::error('ip: ' . $ip . ', ' . $errorMsg);
             $this->returnData(500, $errorMsg);
+        }
+    }
+
+    /**
+     * 创建临时文件夹用于视频分片上传
+     */
+    public function createTempFolder(string $uuid) {
+        // 判断文件夹存不存在
+        $tempDir = self::$filePath . '/temp' . '/' . $uuid;
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
     }
 
@@ -300,7 +310,11 @@ class UploadController extends Controller
      * 取消上传视频
      */
     public function cancelUploadVideo(string $uuid) {
-        $video = Video::where('uuid', $uuid)->firstOrFail();
+        $video = Video::where('uuid', $uuid)->first();
+
+        if (!$video) {
+            $this->returnData(400, '视频信息不存在！');
+        }
 
         $tempDir = self::$filePath . '/temp' . '/' . $uuid;
 

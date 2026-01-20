@@ -8,6 +8,7 @@ use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Video;
+use App\Http\Controllers\File\UploadController;
 
 class VideoConteroller extends Controller
 {
@@ -75,7 +76,12 @@ class VideoConteroller extends Controller
 
             if ($video) {
                 DB::commit();
-                $this->returnData(200, '上传视频初始化成功！');
+
+                (new UploadController())->createTempFolder($uuid);
+
+                $this->returnData(200, '上传视频初始化成功！', [
+                    'uuid' => $uuid
+                ]);
             } else {
                 DB::rollBack();
                 $this->returnData(200, '上传视频初始化失败！');
@@ -92,7 +98,11 @@ class VideoConteroller extends Controller
      * 获取视频上传进度
      */
     public function getVideoProgress(string $uuid) {
-        $video = Video::where('uuid', $uuid)->firstOrFail();
+        $video = Video::where('uuid', $uuid)->first();
+
+        if (!$video) {
+            $this->returnData(400, '视频信息不存在！');
+        }
         
         $uploadedChunks = count(json_decode($video->chunks, true) ?? []);
         $progress = $video->total_chunks > 0 

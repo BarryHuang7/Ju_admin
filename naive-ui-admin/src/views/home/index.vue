@@ -21,7 +21,7 @@
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
-        <div class="mt-20">PHP Laravel</div>
+        <div class="mt-20">PHP Laravel 12</div>
         <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
         <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">聊天室</n-button>
         <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10">直播弹幕</n-button>
@@ -32,10 +32,7 @@
         <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
           模拟商品秒杀
         </n-button>
-        <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">
-          视频
-          <span class="text-[chartreuse]">（开发中）</span>
-        </n-button>
+        <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">视频</n-button>
       </div>
     </div>
 
