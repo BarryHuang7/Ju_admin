@@ -36,7 +36,7 @@ abstract class Controller
             'code' => $code,
             'msg' => $msg,
             'data' => $data
-        ), JSON_UNESCAPED_SLASHES);
+        ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         exit;
     }
