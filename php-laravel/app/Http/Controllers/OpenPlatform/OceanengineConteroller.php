@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Oceanengine;
+namespace App\Http\Controllers\OpenPlatform;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Redis;
-use App\Models\Oceanengine;
+use App\Models\Oceanengine as OceanengineModel;
 use App\Models\OceanengineAdvertiserList;
 
 /**
  * 巨量引擎开放平台
  */
-class OpenPlatformConteroller extends Controller
+class OceanengineConteroller extends Controller
 {
     private $app_id = 1855361102078260;
     private $secret = '9488bd23f1fb0594f9010d7354f890a0397e20f2';
@@ -61,10 +61,10 @@ class OpenPlatformConteroller extends Controller
         // 1、获取授权码
         if ($auth_code) {
             $this->uid = $uid;
-            $oceanengine = Oceanengine::where('uid', $this->uid)->first();
+            $oceanengine = OceanengineModel::where('uid', $this->uid)->first();
 
             if (!$oceanengine) {
-                $oceanengine = Oceanengine::create([
+                $oceanengine = OceanengineModel::create([
                     'auth_code'=> $auth_code,
                     'scope'=> $scope,
                     'material_auth_status'=> $material_auth_status,

@@ -22,8 +22,7 @@ class CheckPermission
         $releaseUrl = array(
             'login/getVerificationCode',
             'login/verification',
-            'login/loginOut',
-            'getPublicInfo'
+            'login/loginOut'
         );
 
         if (!in_array($url, $releaseUrl)) {

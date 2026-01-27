@@ -11,7 +11,7 @@ use App\Http\Controllers\File\UploadController;
 use App\Http\Controllers\Websocket\ChatConteroller;
 use App\Http\Controllers\File\ImageController;
 use App\Http\Controllers\File\VideoConteroller;
-use App\Http\Controllers\Oceanengine\OpenPlatformConteroller;
+use App\Http\Controllers\OpenPlatform\OceanengineConteroller;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -58,4 +58,4 @@ Route::post('handleUploadChunk/{uuid}', [UploadController::class, 'handleUploadC
 Route::get('getVideoProgress/{uuid}', [VideoConteroller::class, 'getVideoProgress']);
 Route::get('cancelUploadVideo/{uuid}', [UploadController::class, 'cancelUploadVideo']);
 
-Route::get('getPublicInfo', [OpenPlatformConteroller::class, 'getPublicInfo']);
+Route::get('getPublicInfo', [OceanengineConteroller::class, 'getPublicInfo']);
