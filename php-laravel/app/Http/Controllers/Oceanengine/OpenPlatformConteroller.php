@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Redis;
+use App\Models\Oceanengine;
+use App\Models\OceanengineAdvertiserList;
 
 /**
  * 巨量引擎开放平台
@@ -27,11 +29,10 @@ class OpenPlatformConteroller extends Controller
     private $ad_advertiser_url = 'https://ad.oceanengine.com/open_api/2/customer_center/advertiser/list/';
     private $public_info_url = 'https://ad.oceanengine.com/open_api/2/advertiser/public_info/';
     private $client = '';
+    private $uid = '';
     private $access_token = '';
-    private $expires_in = '';
     private $refresh_token = '';
-    private $refresh_token_expires_in = '';
-    private $advertiser_id = '';
+    private $cc_account_id = '';
 
     public function __construct() {
         $this->client = new Client([
@@ -39,9 +40,8 @@ class OpenPlatformConteroller extends Controller
             'verify' => false,
             'timeout' => 120
         ]);
-        // $this->advertiser_id = 1691031371042824;
+        // $this->cc_account_id = 1691031371042824;
         // $this->access_token = '24a9dc9b72ad1f3138c594a274de1b2eef8fce37';
-        // $this->access_token = $this->getRedisAccessToken();
     }
 
     /**
@@ -54,60 +54,114 @@ class OpenPlatformConteroller extends Controller
 
         // auth_code有效期只有10分钟，且只能使用一次，过期或者多次使用都会报错
         $auth_code = $reqData['auth_code'] ?? '';
-        // 授权范围
         $scope = $reqData['scope'] ?? '';
-        // 
+        $material_auth_status = $reqData['material_auth_status'] ?? '';
         $uid = $reqData['uid'] ?? '';
 
+        // 1、获取授权码
         if ($auth_code) {
-            // Redis::setex($this->app_id.'_'.$uid.'_auth_code', 60 * 10, $auth_code);
+            $this->uid = $uid;
+            $oceanengine = Oceanengine::where('uid', $this->uid)->first();
+
+            if (!$oceanengine) {
+                $oceanengine = Oceanengine::create([
+                    'auth_code'=> $auth_code,
+                    'scope'=> $scope,
+                    'material_auth_status'=> $material_auth_status,
+                    'uid'=> $this->uid,
+                ]);
+            }
+
+            // 2、获取token
+            $this->access_token = $this->getRedisAccessToken();
 
             if (!$this->access_token) {
-                $response = $this->getAccessToken($auth_code);
+                $tokenInfo = $this->getAccessToken($auth_code);
 
-                Log::info('getAccessToken请求: '. json_encode($response));
+                $this->access_token = $tokenInfo['access_token'];
+                $expires_in = $tokenInfo['expires_in'];
+                $this->refresh_token = $tokenInfo['refresh_token'];
+                $refresh_token_expires_in = $tokenInfo['refresh_token_expires_in'];
 
-                if ($response['status'] === 200 && $response['body']) {
-                    $body = json_decode($response['body'], true);
+                $oceanengine->access_token = $this->access_token;
+                $oceanengine->refresh_token = $this->refresh_token;
+                $oceanengine->save();
 
-                    if ($body && isset($body['data'])) {
-                        $this->access_token = $body['data']['access_token'];
-                        $this->expires_in = $body['data']['expires_in'];
-                        $this->refresh_token = $body['data']['refresh_token'];
-                        $this->refresh_token_expires_in = $body['data']['refresh_token_expires_in'];
+                Redis::setex($this->app_id.'_'.$this->uid.'_access_token', $expires_in, $this->access_token);
+                Redis::setex($this->app_id.'_'.$this->uid.'_refresh_token', $refresh_token_expires_in, $this->refresh_token);
+            }
 
-                        $advertiserInfoResponse = $this->getAdvertiserInfo();
+            // 3、获取授权账户信息
+            $advertiserInfo = $this->getAdvertiserInfo();
 
-                        Log::info('getAdvertiserInfo请求: '. json_encode($advertiserInfoResponse));
+            $this->cc_account_id = $advertiserInfo['cc_account_id'];
 
-                        if ($advertiserInfoResponse['status'] === 200 && $advertiserInfoResponse['body']) {
-                            $advertiserInfoBody = json_decode($advertiserInfoResponse['body'], true);
+            $oceanengine->cc_account_id = $this->cc_account_id;
+            $oceanengine->cc_account_name = $advertiserInfo['cc_account_name'];
+            $oceanengine->account_role = $advertiserInfo['account_role'];
+            $oceanengine->save();
 
-                            if ($advertiserInfoBody && isset($advertiserInfoBody['data'])) {
-                                if (isset($advertiserInfoBody['data']['list']) && count($advertiserInfoBody['data']['list']) > 0) {
-                                    $this->advertiser_id = $advertiserInfoBody['data']['list'][0]['advertiser_id'];
+            // 4、获取广告账户信息
+            $advertiser_list = $this->getAdvertiserList($oceanengine->id, 1, 2);
 
-                                    Redis::setex($this->app_id.'_'.$this->advertiser_id.'_access_token', $this->expires_in, $this->access_token);
-                                    Redis::setex($this->app_id.'_'.$this->advertiser_id.'_refresh_token', $this->refresh_token_expires_in, $this->refresh_token);
+            if (count($advertiser_list) > 0) {
+                OceanengineAdvertiserList::insert($advertiser_list);
 
-                                    $advertiser_ids = $this->getAdvertiserList();
+                $advertiser_ids = array_column($advertiser_list, 'advertiser_id');
+                $new_advertiser_list = OceanengineAdvertiserList::select(
+                    'id', 'oceanengine_id', 'advertiser_id', 'advertiser_name', 'advertiser_type'
+                )->whereIn('advertiser_id', $advertiser_ids)->get();
 
-                                    $publicInfo = $this->clientPublicInfo($advertiser_ids);
+                // 5、获取投放账户信息
+                $publicInfo = $this->clientPublicInfo($advertiser_ids);
 
-                                    dd($publicInfo, 'advertiser_id:'.$this->advertiser_id, 'access_token:'.$this->access_token);
-                                }
-                            }
-                        }
+                // 合并数据
+                $publicInfoIndex = array();
+                foreach ($publicInfo as $pInfo) {
+                    $publicInfoIndex[$pInfo['id']] = $pInfo;
+                }
+
+                $update_advertiser_list= $new_advertiser_list->toArray();
+                foreach ($update_advertiser_list as &$aList) {
+                    $id = $aList['advertiser_id'];
+
+                    if (isset($publicInfoIndex[$id])) {
+                        $aList['company'] = $publicInfoIndex[$id]['company'];
+                        $aList['first_industry_name'] = $publicInfoIndex[$id]['first_industry_name'];
+                        $aList['second_industry_name'] = $publicInfoIndex[$id]['second_industry_name'];
+                        $aList['updated_at'] = date('Y-m-d H:i:s');
                     }
                 }
+                // 解除引用
+                unset($aList);
+
+                OceanengineAdvertiserList::upsert(
+                    $update_advertiser_list,
+                    ['advertiser_id'],
+                    [
+                        'company',
+                        'first_industry_name',
+                        'second_industry_name',
+                        'updated_at'
+                    ]
+                );
+
+                $this->returnData(200, 'Success!', $update_advertiser_list);
             }
         }
+
+        $this->returnData(400, '获取授权码失败!');
     }
 
     /**
      * 获取巨量引擎AccessToken
      */
     private function getAccessToken($auth_code) {
+        $access_token = '';
+        $expires_in = 0;
+        $refresh_token = '';
+        $refresh_token_expires_in = 0;
+
         if ($auth_code && $this->client) {
             try {
                 $response = $this->client->request(
@@ -128,20 +182,39 @@ class OpenPlatformConteroller extends Controller
                 $statusCode = $response->getStatusCode();
                 $body = $response->getBody()->getContents();
 
-                return [
-                    'status' => $statusCode,
-                    'body' => $body
-                ];
+                Log::info('getAccessToken请求: '. $body);
+
+                if ($statusCode === 200) {
+                    $data = json_decode($body, true);
+
+                    if ($data && isset($data['data'])) {
+                        $access_token = $data['data']['access_token'];
+                        $expires_in = $data['data']['expires_in'];
+                        $refresh_token = $data['data']['refresh_token'];
+                        $refresh_token_expires_in = $data['data']['refresh_token_expires_in'];
+                    }
+                }
             } catch (RequestException $e) {
                 Log::error('获取巨量引擎AccessToken错误: ' . $e->getMessage());
             }
         }
+
+        return [
+            'access_token' => $access_token,
+            'expires_in' => $expires_in,
+            'refresh_token' => $refresh_token,
+            'refresh_token_expires_in' => $refresh_token_expires_in,
+        ];
     }
 
     /**
      * 获取已授权账户
      */
     private function getAdvertiserInfo() {
+        $cc_account_id = '';
+        $cc_account_name = '';
+        $account_role = '';
+
         if ($this->client && $this->access_token) {
             try {
                 $response = $this->client->request(
@@ -157,27 +230,46 @@ class OpenPlatformConteroller extends Controller
                 $statusCode = $response->getStatusCode();
                 $body = $response->getBody()->getContents();
 
-                return [
-                    'status' => $statusCode,
-                    'body' => $body
-                ];
+                Log::info('getAccessToken请求: '. $body);
+
+                if ($statusCode === 200) {
+                    $data = json_decode($body, true);
+
+                    if ($data && isset($data['data'])) {
+                        if (isset($data['data']['list']) && count($data['data']['list']) > 0) {
+                            $list = $data['data']['list'][0];
+
+                            $cc_account_id = $list['advertiser_id'];
+                            $cc_account_name = $list['account_name'];
+                            $account_role = $list['account_role'];
+                        }
+                    }
+                }
             } catch (RequestException $e) {
                 Log::error('获取已授权账户错误: ' . $e->getMessage());
             }
         }
+
+        return [
+            'cc_account_id' => $cc_account_id,
+            'cc_account_name' => $cc_account_name,
+            'account_role' => $account_role
+        ];
     }
 
     /**
      * 获取纵横工作台下账户列表
      */
-    private function getAdvertiserList() {
-        $advertiser_ids = array();
+    private function getAdvertiserList($oceanengine_id, $page = 1, $page_size = 10) {
+        $advertiser_list = array();
 
-        if ($this->client && $this->access_token && $this->advertiser_id) {
+        if ($this->client && $this->access_token && $this->cc_account_id) {
             try {
                 $response = $this->client->request(
                     'GET',
-                    $this->ad_advertiser_url . '?cc_account_id=' . $this->advertiser_id . '&account_source=QIANCHUAN',
+                    // &filtering=%7B"account_name"%3A"名称"%7D
+                    // &filtering={"account_name":"名称"}
+                    $this->ad_advertiser_url . '?cc_account_id=' . $this->cc_account_id . '&account_source=QIANCHUAN&page=' . $page . '&page_size=' . $page_size,
                     [
                         'headers' => [
                             'Access-Token' => $this->access_token,
@@ -198,7 +290,12 @@ class OpenPlatformConteroller extends Controller
 
                     if (count($list) > 0) {
                         foreach ($list as $item) {
-                            $advertiser_ids[] = $item['advertiser_id'];
+                            $advertiser_list[] = [
+                                'oceanengine_id' => $oceanengine_id,
+                                'advertiser_id' => $item['advertiser_id'],
+                                'advertiser_name' => $item['advertiser_name'],
+                                'advertiser_type' => $item['advertiser_type']
+                            ];
                         }
                     }
                 }
@@ -207,7 +304,7 @@ class OpenPlatformConteroller extends Controller
             }
         }
 
-        return $advertiser_ids;
+        return $advertiser_list;
     }
 
     /**
@@ -254,6 +351,6 @@ class OpenPlatformConteroller extends Controller
      * 获取redis的AccessToken
      */
     private function getRedisAccessToken() {
-        return Redis::get($this->app_id.'_'.$this->advertiser_id.'_access_token');
+        return Redis::get($this->app_id.'_'.$this->uid.'_access_token');
     }
 }
