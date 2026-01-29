@@ -121,7 +121,7 @@ class OceanengineConteroller extends Controller
                     $publicInfoIndex[$pInfo['id']] = $pInfo;
                 }
 
-                $update_advertiser_list= $new_advertiser_list->toArray();
+                $update_advertiser_list = $new_advertiser_list->toArray();
                 foreach ($update_advertiser_list as &$aList) {
                     $id = $aList['advertiser_id'];
 

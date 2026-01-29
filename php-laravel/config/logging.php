@@ -54,8 +54,47 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => ['info', 'error', 'warning', 'debug'],
             'ignore_exceptions' => false,
+        ],
+
+        'info' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/info/laravel.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 60),
+            'permission' => 0755,
+            'replace_placeholders' => true,
+            'tap' => [App\Logging\InfoOnlyFormatter::class],
+        ],
+
+        'error' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/error/laravel.log'),
+            'level' => 'error',
+            'days' => env('LOG_DAILY_DAYS', 60),
+            'permission' => 0755,
+            'replace_placeholders' => true,
+        ],
+
+        'warning' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/warning/laravel.log'),
+            'level' => 'warning',
+            'days' => env('LOG_DAILY_DAYS', 60),
+            'permission' => 0755,
+            'replace_placeholders' => true,
+            'tap' => [App\Logging\WarningOnlyFormatter::class],
+        ],
+
+        'debug' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/debug/laravel.log'),
+            'level' => 'debug',
+            'days' => env('LOG_DAILY_DAYS', 60),
+            'permission' => 0755,
+            'replace_placeholders' => true,
+            'tap' => [App\Logging\DebugOnlyFormatter::class],
         ],
 
         'single' => [

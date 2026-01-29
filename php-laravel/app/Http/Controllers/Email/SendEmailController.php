@@ -35,6 +35,10 @@ class SendEmailController extends Controller
      */
     public function runTest()
     {
+        Log::info('test info');
+        Log::error('test error');
+        Log::warning('test warning');
+        Log::debug('test debug');
         echo "hello word!<br />";
 
         echo 'oh!';
