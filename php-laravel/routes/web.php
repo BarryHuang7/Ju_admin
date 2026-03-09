@@ -57,5 +57,7 @@ Route::post('videoInitiate', [VideoConteroller::class, 'videoInitiate']);
 Route::post('handleUploadChunk/{uuid}', [UploadController::class, 'handleUploadChunk']);
 Route::get('getVideoProgress/{uuid}', [VideoConteroller::class, 'getVideoProgress']);
 Route::get('cancelUploadVideo/{uuid}', [UploadController::class, 'cancelUploadVideo']);
+Route::get('getVideoList', [VideoConteroller::class, 'getVideoList']);
+Route::get('deleteVideo/{uuid}', [UploadController::class, 'deleteVideo']);
 
 Route::get('getPublicInfo', [OceanengineConteroller::class, 'getPublicInfo']);

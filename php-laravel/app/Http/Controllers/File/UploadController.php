@@ -27,7 +27,8 @@ class UploadController extends Controller
             'file' => 'required|file|max:8192|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,txt'
         ]);
 
-        $userInfo = (new UtilsController())->getUserInfo($request);
+        $Utils = new UtilsController();
+        $userInfo = $Utils->getUserInfo($request);
 
         if ($userInfo && count($userInfo) > 0) {
             $isAdmin = $userInfo['isAdmin'];
@@ -47,7 +48,7 @@ class UploadController extends Controller
             $this->returnData(500, '文件上传失败: 获取用户失败！');
         }
 
-        $ip = (new UtilsController())->getClientRealIp($request);
+        $ip = $Utils->getClientRealIp($request);
 
         try {
             $file = $request->file('file');
@@ -116,7 +117,7 @@ class UploadController extends Controller
             $this->returnData(400, '总分片数量不匹配！');
         }
 
-        if ($video->status != 'uploading') {
+        if ($video->status != 'uploading' && $video->status != 'failed') {
             $this->returnData(400, '该视频状态不允许继续上传！');
         }
 
@@ -129,14 +130,25 @@ class UploadController extends Controller
             $chunkNumber = $reqData['chunk_number'];
             $chunkFileName = sprintf('%04d', $chunkNumber) . '.part';
             $chunkPath = $tempDir . '/' . $chunkFileName;
-
-            if (file_exists($chunkPath)) {
-                // 可以再判断chunksStatus是否成功、文件大小相不相同，确保上传成功
-                $this->returnData(400, '文件已存在！');
-            }
-
             $chunks = json_decode($video->chunks, true) ?? [];
             $chunksStatus = 'failed';
+
+            if (count($chunks) > 0) {
+                foreach ($chunks as $chunkItem) {
+                    if ($chunkItem['chunkNumber'] == $chunkNumber) {
+                        if ($chunkItem['status'] == 'completed') {
+                            $this->returnData(400, '该视频片段已上传！请勿重复上传！');
+                        }
+
+                        // 可能是未完成上传的分片
+                        if (file_exists($chunkPath)) {
+                            unlink($chunkPath);
+                        }
+
+                        break;
+                    }
+                }
+            }
 
             // 移动分片文件
             if ($chunk->move($tempDir, $chunkFileName)) {
@@ -146,11 +158,29 @@ class UploadController extends Controller
                 Log::error('ip: ' . $ip . ', ' . $errorMsg);
             }
 
-            $chunks[] = [
-                'chunkNumber' => $chunkNumber,
-                // 这里保存每个分片的状态，以便后续断点上传扩展
-                'status' => $chunksStatus
-            ];
+            if (count($chunks) > 0) {
+                $isNewChunk = true;
+
+                foreach ($chunks as $chunkKey => $chunkItem) {
+                    if ($chunkItem['chunkNumber'] == $chunkNumber) {
+                        $chunks[$chunkKey]['status'] = $chunksStatus;
+                        $isNewChunk = false;
+                    }
+                }
+
+                // 是否有新分片需要上传
+                if ($isNewChunk) {
+                    $chunks[] = [
+                        'chunkNumber' => $chunkNumber,
+                        'status' => $chunksStatus
+                    ];
+                }
+            } else {
+                $chunks[] = [
+                    'chunkNumber' => $chunkNumber,
+                    'status' => $chunksStatus
+                ];
+            }
             // 更新分片信息
             $video->chunks = json_encode($chunks);
             $video->save();
@@ -161,7 +191,7 @@ class UploadController extends Controller
 
             // 检查是否所有分片都已上传
             $uploadedChunks = count($chunks);
-            $allUploaded = $uploadedChunks >= $totalChunks;
+            $allUploaded = $uploadedChunks >= $totalChunks && $this->allStatusCompleted($chunks);
 
             if ($allUploaded) {
                 // 标记为合并中
@@ -190,11 +220,34 @@ class UploadController extends Controller
     }
 
     /**
+     * 检查所有分片是否都是完成状态
+     */
+    private function allStatusCompleted(array $array) {
+        foreach ($array as $item) {
+            if ($item['status'] !== 'completed') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * 创建临时文件夹用于视频分片上传
      */
     public function createTempFolder(string $uuid) {
         // 判断文件夹存不存在
         $tempDir = self::$filePath . '/temp' . '/' . $uuid;
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+    }
+
+    /**
+     * 创建视频文件夹用于存储视频
+     */
+    public function createVideosFolder(string $path) {
+        // 判断文件夹存不存在
+        $tempDir = dirname(self::$filePath . '/' . $path);
         if (!file_exists($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
@@ -209,12 +262,6 @@ class UploadController extends Controller
         try {
             $tempDir = self::$filePath . '/temp' . '/' . $uuid;
             $finalPath = self::$filePath . '/' . $video->path;
-
-            // 确保目录存在
-            $finalDir = dirname($finalPath);
-            if (!file_exists($finalDir)) {
-                mkdir($finalDir, 0755, true);
-            }
 
             // 按顺序合并所有分片
             $finalFile = fopen($finalPath, 'wb');
@@ -307,7 +354,7 @@ class UploadController extends Controller
     }
 
     /**
-     * 取消上传视频
+     * 取消上传并删除视频
      */
     public function cancelUploadVideo(string $uuid) {
         $video = Video::where('uuid', $uuid)->first();
@@ -332,7 +379,7 @@ class UploadController extends Controller
 
             // 软删除
             if ($video->delete()) {
-                $this->returnData(200, '上传已取消！');
+                $this->returnData(200, '上传已取消并已删除！');
             } else {
                 $this->returnData(500, '数据删除失败！', [
                     'uuid' => $uuid
@@ -341,5 +388,49 @@ class UploadController extends Controller
         }
 
         $this->returnData(500, '取消失败！');
+    }
+
+    /**
+     * 删除视频
+     */
+    public function deleteVideo(string $uuid) {
+        $video = Video::where('uuid', $uuid)->first();
+
+        if (!$video) {
+            $this->returnData(400, '视频信息不存在！');
+        }
+
+        // 清理临时文件
+        $tempDir = self::$filePath . '/temp' . '/' . $uuid;
+
+        if (is_dir($tempDir)) {
+            $files = glob($tempDir . '/*.part');
+
+            foreach ($files as $file) {
+                unlink($file);
+            }
+
+            if (is_dir($tempDir)) {
+                rmdir($tempDir);
+            }
+        }
+
+        // 清理文件
+        $dir = self::$filePath . '/' . $video->path;
+
+        if (file_exists($dir)) {
+            unlink($dir);
+        }
+
+        // 软删除
+        if ($video->delete()) {
+            $this->returnData(200, '视频已删除！');
+        } else {
+            $this->returnData(500, '视频删除失败！', [
+                'uuid' => $uuid
+            ]);
+        }
+
+        $this->returnData(500, '视频删除失败！');
     }
 }

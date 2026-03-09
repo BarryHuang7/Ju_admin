@@ -21,6 +21,12 @@ class VideoConteroller extends Controller
      */
     private $maxSize = 20;
 
+    protected $Video;
+
+    public function __construct(Video $Video) {
+        $this->Video = $Video;
+    }
+
     /**
      * 上传视频初始化
      */
@@ -62,7 +68,7 @@ class VideoConteroller extends Controller
             $file_name = $uuid . '.' . $extension;
             $path = 'videos/' . date('Y-m-d') . '/' . $file_name;
 
-            $video = Video::create([
+            $video = $this->Video::create([
                 'uuid' => $uuid,
                 'original_name' => $reqData['file_name'],
                 'file_name' => $file_name,
@@ -77,7 +83,10 @@ class VideoConteroller extends Controller
             if ($video) {
                 DB::commit();
 
-                (new UploadController())->createTempFolder($uuid);
+                // 这有个坑：php程序创建的文件夹是www的，但异步程序创建的是root，会导致删除之类的无权限
+                $Upload = new UploadController();
+                $Upload->createTempFolder($uuid);
+                $Upload->createVideosFolder($path);
 
                 $this->returnData(200, '上传视频初始化成功！', [
                     'uuid' => $uuid
@@ -98,7 +107,7 @@ class VideoConteroller extends Controller
      * 获取视频上传进度
      */
     public function getVideoProgress(string $uuid) {
-        $video = Video::where('uuid', $uuid)->first();
+        $video = $this->Video::where('uuid', $uuid)->first();
 
         if (!$video) {
             $this->returnData(400, '视频信息不存在！');
@@ -115,6 +124,41 @@ class VideoConteroller extends Controller
             'progress' => $progress,
             'uploaded_chunks' => $uploadedChunks,
             'total_chunks' => $video->total_chunks
+        ]);
+    }
+
+    /**
+     * 获取视频列表
+     */
+    public function getVideoList(Request $request) {
+        $reqData = $request->all();
+        $this->requestValidate(
+            $reqData,
+            [
+                'pageIndex' => 'required|integer',
+                'pageSize' => 'required|integer'
+            ],
+            [
+                'pageIndex.required' => '当前页不能为空！',
+                'pageSize.required' => '页数不能为空！'
+            ]
+        );
+
+        $fields = array('id', 'uuid', 'original_name', 'path', 'mime_type', 'size', 'chunks', 'total_chunks', 'status', 'created_at', 'updated_at');
+        $pageIndex = $request->get('pageIndex', 1);
+        $pageSize = $request->get('pageSize', 5);
+
+        $model = $this->Video::select($fields)
+            ->orderBy('created_at', 'desc');
+
+        $total = $model->count();
+        $list = $model->offset(($pageIndex - 1) * $pageSize)
+            ->limit($pageSize)
+            ->get();
+
+        $this->returnData(200, 'Success!', [
+            'list' => $list,
+            'total' => $total
         ]);
     }
 }

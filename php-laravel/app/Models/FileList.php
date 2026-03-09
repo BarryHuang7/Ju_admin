@@ -16,4 +16,12 @@ class FileList extends Model
         'file_date',
         'is_admin'
     ];
+
+    /**
+     * 为日期属性设置统一的序列化格式
+     */
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }

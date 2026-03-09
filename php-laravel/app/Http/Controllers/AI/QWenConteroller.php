@@ -39,6 +39,11 @@ class QWenConteroller extends Controller
 
         Log::info($log_msg . ", 正在请求QWen chat。");
 
+        return response()->json([
+            'code' => 500,
+            'msg' => '额度不足请续费！'
+        ]);
+
         if (!$userId || !$userName || !$messages) {
             return response()->json([
                 'code' => 400,

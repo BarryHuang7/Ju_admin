@@ -41,3 +41,21 @@ export function cancelUploadVideo(uuid) {
     },
   });
 }
+
+export function getVideoList(params) {
+  return httpTwo.request({
+    url: '/getVideoList',
+    method: 'GET',
+    params,
+  });
+}
+
+export function deleteVideo(uuid) {
+  return httpTwo.request({
+    url: `/deleteVideo/${uuid}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}

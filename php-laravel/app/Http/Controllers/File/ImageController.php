@@ -50,15 +50,15 @@ class ImageController extends Controller
 
         $model = FileList::select($fields)
             ->where($where)
-            ->orderBy('created_at', 'desc')
-            ->offset(($pageIndex - 1) * $pageSize)
-            ->limit($pageSize);
+            ->orderBy('created_at', 'desc');
 
         // 打印sql语句
         // dd($model->toSql(), $model->getBindings());
 
         $total = $model->count();
-        $list = $model->get();
+        $list = $model->offset(($pageIndex - 1) * $pageSize)
+            ->limit($pageSize)
+            ->get();
 
         $this->returnData(200, 'Success!', [
             'list' => $list,

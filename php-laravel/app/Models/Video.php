@@ -19,13 +19,9 @@ class Video extends Model
         'path',
         'mime_type',
         'size',
-        // 'duration',
-        // 'width',
-        // 'height',
         'chunks',
         'total_chunks',
-        'status',
-        // 'thumbnail_path'
+        'status'
     ];
 
     /**
@@ -34,4 +30,12 @@ class Video extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+
+    /**
+     * 为日期属性设置统一的序列化格式
+     */
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }
