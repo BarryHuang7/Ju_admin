@@ -59,5 +59,6 @@ Route::get('getVideoProgress/{uuid}', [VideoConteroller::class, 'getVideoProgres
 Route::get('cancelUploadVideo/{uuid}', [UploadController::class, 'cancelUploadVideo']);
 Route::get('getVideoList', [VideoConteroller::class, 'getVideoList']);
 Route::get('deleteVideo/{uuid}', [UploadController::class, 'deleteVideo']);
+Route::get('videoStream/{uuid}', [VideoConteroller::class, 'videoStream']);
 
 Route::get('getPublicInfo', [OceanengineConteroller::class, 'getPublicInfo']);

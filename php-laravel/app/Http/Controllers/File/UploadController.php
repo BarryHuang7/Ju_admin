@@ -433,4 +433,17 @@ class UploadController extends Controller
 
         $this->returnData(500, '视频删除失败！');
     }
+
+    /**
+     * 获取文件
+     */
+    public function getFilePath(string $fileName) {
+        $path = self::$filePath . '/' . $fileName;
+
+        if (!file_exists($path)) {
+            $this->returnData(404, '文件不存在！');
+        }
+
+        return $path;
+    }
 }

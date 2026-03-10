@@ -317,3 +317,18 @@ export const httpBlob = createAxios({
   },
   responseType: 'blob',
 });
+
+/**
+ * 用于获取视频流
+ */
+export const httpArrayBuffer = createAxios({
+  authenticationScheme: 'Bearer',
+  requestOptions: {
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: phpUrlPrefix,
+    withToken: true,
+    isReturnNativeResponse: true,
+    isTransformResponse: false,
+  },
+  responseType: 'arraybuffer',
+});

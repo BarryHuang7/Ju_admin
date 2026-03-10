@@ -1,4 +1,4 @@
-import { httpTwo } from '@/utils/http/axios';
+import { httpTwo, httpArrayBuffer } from '@/utils/http/axios';
 
 export function videoInitiate(params) {
   return httpTwo.request({
@@ -56,6 +56,17 @@ export function deleteVideo(uuid) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function videoStream(uuid, start, end) {
+  return httpArrayBuffer.request({
+    url: `/videoStream/${uuid}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Range: `bytes=${start}-${end}`,
     },
   });
 }
