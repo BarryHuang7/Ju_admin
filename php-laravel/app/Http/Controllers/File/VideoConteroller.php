@@ -65,13 +65,15 @@ class VideoConteroller extends Controller
         DB::beginTransaction();
         try {
             $uuid = Uuid::uuid4()->toString();
-            $file_name = $uuid . '.' . $extension;
-            $path = 'videos/' . date('Y-m-d') . '/' . $file_name;
+            $fileName = $uuid . '.' . $extension;
+            $indexPath = 'videos/' . date('Y-m-d') . '/' . $uuid;
+            $path = $indexPath . '/' . $fileName;
 
             $video = $this->Video::create([
                 'uuid' => $uuid,
                 'original_name' => $reqData['file_name'],
-                'file_name' => $file_name,
+                'file_name' => $fileName,
+                'index_path' => $indexPath . '/playlist.m3u8',
                 'path' => $path,
                 'mime_type' => $reqData['mime_type'],
                 'size' => $reqData['size'],
@@ -144,7 +146,10 @@ class VideoConteroller extends Controller
             ]
         );
 
-        $fields = array('id', 'uuid', 'original_name', 'path', 'mime_type', 'size', 'chunks', 'total_chunks', 'status', 'created_at', 'updated_at');
+        $fields = array(
+            'id', 'uuid', 'original_name', 'index_path', 'path', 'mime_type',
+            'size', 'chunks', 'total_chunks', 'status', 'created_at', 'updated_at'
+        );
         $pageIndex = $request->get('pageIndex', 1);
         $pageSize = $request->get('pageSize', 5);
 
@@ -160,64 +165,5 @@ class VideoConteroller extends Controller
             'list' => $list,
             'total' => $total
         ]);
-    }
-
-    /**
-     * 流式播放视频
-     */
-    public function videoStream(Request $request, string $uuid) {
-        $video = $this->Video::where('uuid', $uuid)->first();
-
-        if (!$video) {
-            $this->returnData(400, '视频信息不存在！');
-        }
-
-        $path = (new UploadController())->getFilePath($video->path);
-        $fileSize = $video->size;
-        $mimeType = $video->mime_type;
-
-        // 解析HTTP Range头
-        $range = $request->header('Range');
-
-        if ($range) {
-            // 处理范围请求
-            list($start, $end) = $this->parseRange($range, $fileSize);
-
-            $headers = [
-                'Access-Control-Expose-Headers' => 'Content-Range, Accept-Ranges, Content-Length, Content-Type',
-                'Content-Type' => $mimeType,
-                'Content-Length' => $end - $start,
-                'Content-Range' => "bytes {$start}-{$end}/{$fileSize}",
-                'Accept-Ranges' => 'bytes',
-                'Cache-Control' => 'no-cache',
-            ];
-            
-            return response()->stream(function () use ($path, $start, $end) {
-                $stream = fopen($path, 'rb');
-                fseek($stream, $start);
-                echo fread($stream, $end);
-                fclose($stream);
-            }, 206, $headers);
-        }
-    }
-
-    /**
-     * 解析Range头
-     */
-    private function parseRange(string $range, int $fileSize) {
-        // 去掉 "bytes="
-        $range = substr($range, 6);
-        $parts = explode('-', $range);
-        
-        $start = intval($parts[0]);
-        $end = isset($parts[1]) && $parts[1] !== '' ? intval($parts[1]) : 1024 * 1024;
-        
-        // 边界检查
-        if ($start > $end || $start < 0 || $end > $fileSize) {
-            $start = 0;
-            $end = 1024 * 1024;
-        }
-        
-        return [$start, $end];
     }
 }

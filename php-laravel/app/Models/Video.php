@@ -16,6 +16,7 @@ class Video extends Model
         'uuid',
         'original_name',
         'file_name',
+        'index_path',
         'path',
         'mime_type',
         'size',

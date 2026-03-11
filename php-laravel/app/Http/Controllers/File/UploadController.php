@@ -284,8 +284,7 @@ class UploadController extends Controller
             if (is_dir($tempDir)) {
                 rmdir($tempDir);
             }
-
-            // 更新视频状态
+            
             $video->status = 'processing';
             $video->save();
 
@@ -307,45 +306,34 @@ class UploadController extends Controller
                 Log::error('uuid: ' . $uuid . ', 处理视频元数据失败: 文件【' . $videoPath . '】不存在');
             }
 
-            // 使用 FFMpeg 获取视频信息
-            // composer require php-ffmpeg/php-ffmpeg
-            // use FFMpeg\FFMpeg;
-            // use FFMpeg\Coordinate\TimeCode;
-            // if (class_exists('FFMpeg\FFMpeg')) {
-            //     $ffmpeg = FFMpeg::create([
-            //         // 二进制文件
-            //         'ffmpeg.binaries' => config('video.ffmpeg_path', '/usr/bin/ffmpeg'),
-            //         'ffprobe.binaries' => config('video.ffprobe_path', '/usr/bin/ffprobe'),
-            //         'timeout' => 3600,
-            //         'ffmpeg.threads' => 12,
-            //     ]);
+            Log::info('uuid: ' . $uuid . ',转换以下路径的视频：' . $videoPath);
 
-            //     $videoFile = $ffmpeg->open($videoPath);
-            //     $stream = $videoFile->getStreams()->videos()->first();
+            $parts = explode('/', $videoPath);
 
-            //     if ($stream) {
-            //         $video->duration = floor($stream->get('duration'));
-            //         $video->width = $stream->get('width');
-            //         $video->height = $stream->get('height');
-            //     }
+            if (count($parts) > 5) {
+                $output = self::$filePath . '/' . $parts[3] . '/' . $parts[4] . '/' . $parts[5];
+                Log::info('uuid: ' . $uuid . ',视频输出：' . $output);
 
-            //     // 生成缩略图
-            //     $thumbnailPath = 'thumbnails/' . date('Y-m-d') . '/' . $video->uuid . '.jpg';
-            //     $thumbnailFullPath = storage_path(self::$filePath . '/' . $thumbnailPath);
+                // 执行转换FFMpeg
+                $command = sprintf(
+                    'ffmpeg -i %s -c:v libx264 -c:a aac -strict -2 -f hls -hls_time %d -hls_list_size 0 -hls_segment_filename %s %s 2>&1',
+                    escapeshellarg($videoPath),
+                    10,
+                    escapeshellarg($output . '/segment_%03d.ts'),
+                    escapeshellarg($output . '/playlist.m3u8')
+                );
+                exec($command, $execOutput, $returnCode);
 
-            //     $thumbnailDir = dirname($thumbnailFullPath);
-            //     if (!file_exists($thumbnailDir)) {
-            //         mkdir($thumbnailDir, 0755, true);
-            //     }
+                if ($returnCode !== 0) {
+                    Log::info('uuid: ' . $uuid . ',视频输出：' . $output . ', 失败。');
+                    throw new \Exception("HLS 转换失败: " . implode("\n", $execOutput));
+                }
 
-            //     $frame = $videoFile->frame(TimeCode::fromSeconds(10));
-            //     $frame->save($thumbnailFullPath);
+                Log::info('uuid: ' . $uuid . ',视频输出：' . $output . ', 完成。');
 
-            //     $video->thumbnail_path = $thumbnailPath;
-            // }
-
-            $video->status = 'completed';
-            $video->save();
+                $video->status = 'completed';
+                $video->save();
+            }
         } catch (\Exception $e) {
             Log::error('uuid: ' . $uuid . ', 处理视频元数据失败: ' . $e->getMessage());
             $video->status = 'failed';
@@ -410,16 +398,23 @@ class UploadController extends Controller
                 unlink($file);
             }
 
-            if (is_dir($tempDir)) {
-                rmdir($tempDir);
-            }
+            rmdir($tempDir);
         }
 
         // 清理文件
-        $dir = self::$filePath . '/' . $video->path;
+        $parts = explode('/', $video->path);
+        if (count($parts) > 2) {
+            $dir = self::$filePath . '/' . $parts[0] . '/' . $parts[1] . '/' . $parts[2];
 
-        if (file_exists($dir)) {
-            unlink($dir);
+            if (is_dir($dir)) {
+                $files = glob($dir . '/*');
+
+                foreach ($files as $file) {
+                    unlink($file);
+                }
+
+                rmdir($dir);
+            }
         }
 
         // 软删除
@@ -432,18 +427,5 @@ class UploadController extends Controller
         }
 
         $this->returnData(500, '视频删除失败！');
-    }
-
-    /**
-     * 获取文件
-     */
-    public function getFilePath(string $fileName) {
-        $path = self::$filePath . '/' . $fileName;
-
-        if (!file_exists($path)) {
-            $this->returnData(404, '文件不存在！');
-        }
-
-        return $path;
     }
 }

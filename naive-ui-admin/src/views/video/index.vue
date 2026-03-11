@@ -9,11 +9,14 @@
     deleteVideo,
   } from '@/api/php/video';
   import { DataTableColumns, NButton, NPopconfirm, NTag } from 'naive-ui';
+  import { VideoPlayer } from '@videojs-player/vue';
+  import 'video.js/dist/video-js.css';
 
   type listType = {
     id: number;
     uuid: string;
     original_name: string;
+    index_path: string;
     path: string;
     mime_type: string;
     size: number;
@@ -214,6 +217,10 @@
    */
   const showModal = ref(false);
   /**
+   * 视频模态框标题
+   */
+  const modalTitle = ref('');
+  /**
    * 视频路径
    */
   const videoUrl = ref('');
@@ -225,16 +232,6 @@
    * 断点续传信息
    */
   const resumeUploadInfo = ref<listType>();
-  /**
-   * 视频流ref
-   */
-  // const videoStreamRef = ref();
-  /**
-   * 视频是否在缓存
-   */
-  // const isBuffering = ref(false);
-  // const mediaSource = ref();
-  // const sourceBuffer = ref();
 
   /**
    * 初始化数据
@@ -583,87 +580,19 @@
   };
 
   /**
-   * 加载视频流媒体
-   */
-  // const loadVideoSegment = async (uuid: string, start: number, end: number) => {
-  //   try {
-  //     const response = await videoStream(uuid, start, end);
-  //     const buffer: any = response.data;
-
-  //     // 添加到 SourceBuffer
-  //     if (sourceBuffer.value && !sourceBuffer.value.updating) {
-  //       sourceBuffer.value.appendBuffer(buffer);
-  //     }
-
-  //     // 获取 Content-Range 来确定是否还有更多数据
-  //     const contentRange = response.headers.get('Content-Range');
-  //     if (contentRange) {
-  //       const matches = contentRange.match(/bytes \d+-\d+\/(\d+)/);
-  //       if (matches) {
-  //         const total = parseInt(matches[1]);
-  //         const end = parseInt(contentRange.split(' ')[1].split('-')[1]);
-
-  //         if (end < total - 1) {
-  //           // 继续加载下一段
-  //           const newStart = end + 1;
-  //           // 每次加载1MB
-  //           const newEnd = end + 1 + 1024 * 1024 >= total ? total : end + 1 + 1024 * 1024;
-  //           await loadVideoSegment(uuid, newStart, newEnd);
-  //         } else {
-  //           // 加载完成
-  //           mediaSource.value.endOfStream();
-  //         }
-  //       }
-  //     }
-  //   } catch (error: any) {
-  //     if (error.name === 'AbortError') {
-  //       console.log('请求被取消');
-  //     } else {
-  //       console.error('加载失败:', error);
-  //     }
-  //   }
-  // };
-
-  /**
    * 打开模态框查看视频
    */
   const openModal = (row: any) => {
-    videoUrl.value = `${domainAddress}:8077/file/${row.path}`;
+    modalTitle.value = '查看【' + row.original_name + '】';
+    videoUrl.value = `${domainAddress}:8077/file/${row.index_path}`;
     showModal.value = true;
-    // await nextTick();
-
-    // if (!videoStreamRef.value) return;
-
-    // mediaSource.value = new MediaSource();
-    // videoStreamRef.value.src = URL.createObjectURL(mediaSource.value);
-
-    // mediaSource.value.addEventListener('sourceopen', async () => {
-    //   console.log('MediaSource 已打开');
-    //   const mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
-
-    //   if (!MediaSource.isTypeSupported(mimeType)) {
-    //     console.error('MIME 类型不支持:', mimeType);
-    //     return;
-    //   }
-
-    //   sourceBuffer.value = mediaSource.value.addSourceBuffer(mimeType);
-
-    //   await loadVideoSegment(row.uuid, 0, 1024 * 1024 > row.size ? row.size : 1024 * 1024);
-    // });
-
-    // mediaSource.value.addEventListener('sourceclose', () => {
-    //   console.log('MediaSource 已关闭');
-    // });
-
-    // mediaSource.value.addEventListener('sourceended', () => {
-    //   console.log('MediaSource 已结束');
-    // });
   };
 
   /**
    * 关闭视频模态框
    */
   const closeModal = () => {
+    modalTitle.value = '';
     videoUrl.value = '';
     showModal.value = false;
   };
@@ -685,6 +614,8 @@
         <span class="high-light">分片</span>
         <span>上传的视频列表，支持</span>
         <span class="high-light">断点续传</span>
+        <span>，播放的视频格式是转化后的</span>
+        <span class="high-light">m3u8</span>
         <span>。</span>
       </n-alert>
     </n-space>
@@ -746,7 +677,7 @@
       <n-modal v-model:show="showModal">
         <n-card
           style="width: 800px; max-height: 80%; overflow-y: auto"
-          title="查看视频"
+          :title="modalTitle"
           :bordered="false"
           size="huge"
           role="dialog"
@@ -756,20 +687,13 @@
             <span cursor-pointer text-30 @click="closeModal">×</span>
           </template>
 
-          <div class="w-full max-w-[400px] h-a ma">
-            <video :src="videoUrl" controls class="w-full h-a max-w-full max-h-full object-contain">
-              您的浏览器不支持视频播放。
-            </video>
-            <!-- <video
-              ref="videoStreamRef"
-              controls
-              preload="metadata"
-              @waiting="handleBuffering"
-              @playing="handlePlaying"
-              @canplay="handleCanPlay"
-            >
-            </video>
-            <div v-if="isBuffering" class="buffer-tip">缓冲中...</div> -->
+          <div v-if="videoUrl" class="w-full max-w-[400px] h-a ma">
+            <VideoPlayer
+              :src="videoUrl"
+              :autoPlay="false"
+              :controls="true"
+              class="w-full h-[400px] max-w-full max-h-full object-contain"
+            />
           </div>
 
           <template #footer>
