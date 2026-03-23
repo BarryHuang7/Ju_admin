@@ -13,6 +13,9 @@ use App\Http\Controllers\File\ImageController;
 use App\Http\Controllers\File\VideoConteroller;
 use App\Http\Controllers\OpenPlatform\OceanengineConteroller;
 
+// 高性能swoole http服务
+use Laravel\Octane\Facades\Octane;
+
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -62,3 +65,11 @@ Route::get('deleteVideo/{uuid}', [UploadController::class, 'deleteVideo']);
 Route::get('videoStream/{uuid}', [VideoConteroller::class, 'videoStream']);
 
 Route::get('getPublicInfo', [OceanengineConteroller::class, 'getPublicInfo']);
+
+// 粗略计算请求大概快乐9倍（64ms -> 7ms）
+Octane::route('POST', '/flashSaleProducts', function () {
+  // 在闭包中实例化控制器并调用方法
+  return app()->call([app()->make(FlashSaleController::class), 'flashSaleProducts']);
+});
+Route::post('generateProducts', [FlashSaleController::class, 'generateProducts']);
+Route::post('removeFlashSaleProducts', [FlashSaleController::class, 'removeFlashSaleProducts']);

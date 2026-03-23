@@ -221,4 +221,14 @@ return [
 
     'max_execution_time' => 30,
 
+    'swoole' => [
+        'options' => [
+            // 开启守护进程模式（官方推荐，使Octane变为真正的守护进程）
+            'daemonize' => true,
+            // 重定向所有标准输出和错误输出到指定文件，避免输出到控制台
+            'log_file' => storage_path('logs/octane.log'),
+            // 0:DEBUG, 1:INFO, 2:NOTICE, 3:WARNING, 4:ERROR
+            'log_level' => 3,
+        ],
+    ],
 ];

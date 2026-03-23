@@ -20,6 +20,7 @@ import { useUserStoreWidthOut } from '@/store/modules/user';
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix || '';
 const phpUrlPrefix = globSetting.phpUrlPrefix || '';
+const phpOctaneUrlPrefix = globSetting.phpOctaneUrlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
@@ -93,7 +94,7 @@ const transform: AxiosTransform = {
     }
 
     // 接口请求成功，直接返回结果
-    if (code === ResultEnum.SUCCESS) {
+    if ([ResultEnum.SUCCESS, 422].includes(code)) {
       return data;
     }
     // 接口请求错误，统一提示错误信息 这里逻辑可以根据项目进行修改
@@ -331,4 +332,21 @@ export const httpArrayBuffer = createAxios({
     isTransformResponse: false,
   },
   responseType: 'arraybuffer',
+});
+
+/**
+ * 用于php高性能http请求
+ */
+export const httpOctane = createAxios({
+  timeout: 60 * 1000,
+  authenticationScheme: 'Bearer',
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
+  requestOptions: {
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: phpOctaneUrlPrefix,
+    withToken: true,
+    isReturnNativeResponse: false,
+    isTransformResponse: true,
+    joinTime: true,
+  },
 });

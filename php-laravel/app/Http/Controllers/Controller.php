@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class Controller
 {
@@ -39,5 +40,25 @@ abstract class Controller
         ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         exit;
+    }
+
+    /**
+     * octane 请求返回数据
+     * @param integer $status 请求状态码
+     * @param integer $code 返回状态码
+     * @param string $msg 自定义提示信息
+     * @param array $data 数据
+     * @return array
+     */
+    public function octaneReturnData($status = 400, $code = 400, $msg = '', $data = []) {
+        return new Response(
+            json_encode([
+                'code' => $code,
+                'msg' => $msg,
+                'data' => $data
+            ]),
+            $status,
+            ['Content-Type' => 'application/json']
+        );
     }
 }

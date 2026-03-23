@@ -59,7 +59,6 @@ class Swoole extends Command
     }
 
     /**
-     * （等待验证）运行octane：守护进程、监听端口 php artisan octane:start --daemon --port=8000
      * php artisan swoole start& // &常驻后台
      * ps aux | grep "artisan swoole start"
      */
