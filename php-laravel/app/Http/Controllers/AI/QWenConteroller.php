@@ -39,11 +39,6 @@ class QWenConteroller extends Controller
 
         Log::info($log_msg . ", 正在请求QWen chat。");
 
-        return response()->json([
-            'code' => 500,
-            'msg' => '额度不足请续费！'
-        ]);
-
         if (!$userId || !$userName || !$messages) {
             return response()->json([
                 'code' => 400,
@@ -56,12 +51,48 @@ class QWenConteroller extends Controller
         $qwenModel->content = $messages;
         $qwenModel->save();
 
-        TaskScheduler::dispatch(2, [
-            'userId' => $userId,
-            'userName' => $userName,
-            'messages' => $messages,
-            'qwenModel' => $qwenModel
-        ], $ip);
+        // TaskScheduler::dispatch(2, [
+        //     'userId' => $userId,
+        //     'userName' => $userName,
+        //     'messages' => $messages,
+        //     'qwenModel' => $qwenModel
+        // ], $ip);
+
+        // 没有免费额度，就不调用千问接口了
+        $client = new Client([
+            // 禁用 SSL 验证
+            'verify' => false,
+            'timeout' => 120
+        ]);
+        $client->request(
+            'POST',
+            '127.0.0.1:9502/websocket/qwen',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'user_name' => $userName,
+                    'user_id' => $userId,
+                    'content' => '额度不足请续费！'
+                ]
+            ]
+        );
+        $client->request(
+            'POST',
+            '127.0.0.1:9502/websocket/qwen',
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'user_name' => $userName,
+                    'user_id' => $userId,
+                    'content' => '',
+                    'finish_reason' => 'stop'
+                ]
+            ]
+        );
 
         return response()->json([
             'code' => 200,
