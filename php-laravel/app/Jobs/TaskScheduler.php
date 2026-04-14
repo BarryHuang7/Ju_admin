@@ -39,7 +39,7 @@ class TaskScheduler implements ShouldQueue
     {
         /**
          * 本地 php artisan queue:work --queue=tasks
-         * 服务器 nohup php artisan queue:work --queue=tasks > storage/logs/queue.log 2>&1 &
+         * 服务器（使用与php相同的用户组避免日志权限报错） sudo -u www nohup php artisan queue:work --queue=tasks > storage/logs/queue.log 2>&1 &
          * 搜索进程 ps aux | grep "artisan queue:work --queue=tasks"
          * 杀死进程 kill -9 id
          */
