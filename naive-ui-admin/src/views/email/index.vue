@@ -37,7 +37,7 @@
     <n-space vertical :size="12" mb-20>
       <n-alert title="功能说明" type="info">
         <span>这是使用</span>
-        <span class="high-light">队列 job</span>
+        <span class="high-light">rabbitMQ 队列</span>
         <span>的异步发邮箱功能。</span>
       </n-alert>
     </n-space>

@@ -1,0 +1,28 @@
+docker run -d \
+  --name rabbitmq \
+  --memory="512m" \        # 限制容器的最大内存为 512 MB
+  --memory-swap="512m" \   # 限制总内存+Swap 也为 512 MB
+  --restart=unless-stopped \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  -e RABBITMQ_DEFAULT_USER=admin \
+  -e RABBITMQ_DEFAULT_PASS=密码 \
+  rabbitmq:management
+
+重启：sudo systemctl restart docker
+拉取镜像：docker pull rabbitmq:management
+查看容器列表：docker ps
+
+配置阿里镜像加速器（！！仅支持阿里云用户使用具备公网访问能力！！）
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": [""]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+查看阿里镜像加速器地址：https://cr.console.aliyun.com/cn-shenzhen/instances/mirrors
+
+登录获得阿里镜像凭证：sudo docker login --username=dingtalk_kkupmw crpi-n8ablab58fs5nvl9.cn-shenzhen.personal.cr.aliyuncs.com

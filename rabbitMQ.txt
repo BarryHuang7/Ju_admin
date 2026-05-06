@@ -1,0 +1,57 @@
+# 更新包列表
+sudo apt-get update
+
+# 安装基础依赖和 Erlang
+sudo apt-get install -y curl gnupg apt-transport-https software-properties-common
+
+# 安装 Erlang（RabbitMQ 依赖）
+sudo apt-get install -y erlang-base \
+    erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets \
+    erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key \
+    erlang-runtime-tools erlang-snmp erlang-ssl \
+    erlang-syntax-tools erlang-tftp erlang-tools erlang-xmerl
+
+# 添加 RabbitMQ 签名密钥
+curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/com.rabbitmq.team.gpg > /dev/null
+
+# 添加 RabbitMQ APT 仓库（Ubuntu 22.04 对应 jammy）
+echo "deb [signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://ppa1.novemberain.com/rabbitmq/rabbitmq-server/deb/ubuntu jammy main" | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+
+# 更新包列表
+sudo apt-get update
+
+# 安装 RabbitMQ Server
+sudo apt-get install -y rabbitmq-server
+
+# 启动并设置开机自启
+sudo systemctl start rabbitmq-server
+sudo systemctl enable rabbitmq-server
+
+# 开启 Web 管理插件
+sudo rabbitmq-plugins enable rabbitmq_management
+
+# 创建管理员用户（替换密码）
+sudo rabbitmqctl add_user admin 密码
+sudo rabbitmqctl set_user_tags admin administrator
+sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+
+# 删除默认 guest 用户
+sudo rabbitmqctl delete_user guest
+
+# 重启服务
+sudo systemctl restart rabbitmq-server
+
+# 查看状态
+sudo systemctl status rabbitmq-server
+
+# 安装驱动
+composer require dejwcake/laravel-queue-rabbitmq
+# 会提示创建两个github秘钥
+
+# 重新生成自动加载文件
+composer dump-autoload -o
+
+# 清理缓存
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear

@@ -3,6 +3,8 @@ php.ini配置修改加上 extension_dir = "ext"
 完整配置
 [PHP]
 extension_dir = "ext"
+extension=php_sockets
+extension=php_mbstring
 extension=php_zip
 extension=php_gd
 extension=php_pdo_mysql

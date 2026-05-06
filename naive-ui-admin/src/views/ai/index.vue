@@ -216,7 +216,7 @@
     <n-space vertical :size="12" class="mb-20">
       <n-alert title="功能说明" type="info">
         <span>这是使用</span>
-        <span class="high-light">队列</span>
+        <span class="high-light">rabbitMQ 队列</span>
         <span>请求</span>
         <span class="high-light">阿里通义千问plus</span>
         <span>的流式AI问答功能。</span>

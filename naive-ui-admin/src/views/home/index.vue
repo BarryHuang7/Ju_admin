@@ -21,18 +21,29 @@
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
-        <div class="mt-20">PHP Laravel 12</div>
-        <n-button type="info" @click="skip(1)" class="mt-20 md:mt-10 mr-10">图片列表</n-button>
-        <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">聊天室</n-button>
-        <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10">直播弹幕</n-button>
-        <n-button type="info" @click="skip(4)" class="mt-20 md:mt-10 mr-10">发送邮箱</n-button>
-        <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
-          通义千问chat
-        </n-button>
-        <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
-          模拟商品秒杀
-        </n-button>
-        <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">视频</n-button>
+        <div class="mt-20">前端端语言是：vue 3 + typescript + naive-ui + tailwind</div>
+        <div class="mt-20">后端语言是：PHP 8.2 + Laravel 12</div>
+
+        <div class="mt-20">
+          <n-button type="info" @click="skip(1)" class="md:mt-10 mr-10">图片列表</n-button>
+          <n-button type="info" @click="skip(2)" class="mt-20 md:mt-10 mr-10">聊天室</n-button>
+          <n-button type="info" @click="skip(3)" class="mt-20 md:mt-10 mr-10">直播弹幕</n-button>
+          <n-button type="info" @click="skip(4)" class="mt-20 md:mt-10 mr-10">发送邮箱</n-button>
+          <n-button type="info" @click="skip(5)" class="mt-20 md:mt-10 mr-10">
+            通义千问chat
+          </n-button>
+          <n-button type="info" @click="skip(6)" class="mt-20 md:mt-10 mr-10">
+            模拟商品秒杀
+          </n-button>
+          <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">视频</n-button>
+        </div>
+
+        <div class="mt-20 inline-block">
+          <span>另一个账号：guest2，密码：123456</span>
+          <n-button type="info" @click="copyLine()" title="点击复制链接" class="ml-10">
+            {{ copied ? '复制成功✅️' : '复制' }}
+          </n-button>
+        </div>
       </div>
     </div>
 
@@ -57,6 +68,7 @@
     GridComponent,
   } from 'echarts/components';
   import VChart from 'vue-echarts';
+  import { useClipboard } from '@vueuse/core';
 
   interface guestRecordDataType {
     month: string;
@@ -123,6 +135,7 @@
       },
     ],
   }));
+  const { copy, copied } = useClipboard({ legacy: true });
 
   /**
    * 尝试点击
@@ -190,6 +203,18 @@
         chartYAxisData.push(...data.series);
       }
     });
+  };
+
+  /**
+   * 复制链接
+   */
+  const copyLine = async () => {
+    try {
+      await copy('http://110.41.16.194:8080/?u=guest2&p=123456');
+    } catch (err) {
+      window['$message'].error('复制失败');
+      console.error('复制失败！原因:', err);
+    }
   };
 
   onMounted(() => {
