@@ -84,6 +84,16 @@ return [
                 ],
             ],
             'queue' => env('RABBITMQ_QUEUE', 'default'),
+            'options' => [
+                'queue' => [
+                    // 开启失败消息的死信路由
+                    'reroute_failed' => true,
+                    // 可选：指定死信交换机，省略则使用默认的 amq.direct
+                    // 'failed_exchange' => 'failed.dlx',
+                    // 可选：指定死信路由键，省略则默认为 '队列名.failed'，%s 会被替换为队列名
+                    // 'failed_routing_key' => 'failed.%s',
+                ],
+            ],
         ],
 
     ],
