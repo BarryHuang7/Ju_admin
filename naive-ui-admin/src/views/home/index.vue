@@ -21,7 +21,7 @@
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
-        <div class="mt-20">前端端语言是：vue 3 + typescript + naive-ui + tailwind</div>
+        <div class="mt-20">前端语言是：vue 3 + typescript + naive-ui + tailwind</div>
         <div class="mt-20">后端语言是：PHP 8.2 + Laravel 12</div>
 
         <div class="mt-20">
