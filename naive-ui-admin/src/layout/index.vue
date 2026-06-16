@@ -58,10 +58,8 @@
             <MainView />
           </div>
         </div>
-        <!--1.15废弃，没啥用，占用操作空间-->
-        <!--        <NLayoutFooter v-if="getShowFooter">-->
-        <!--          <PageFooter />-->
-        <!--        </NLayoutFooter>-->
+
+        <PageFooter />
       </n-layout-content>
       <n-back-top :right="25" :bottom="70" />
     </n-layout>
@@ -79,10 +77,10 @@
   import { useDesignSetting } from '@/hooks/setting/useDesignSetting';
   import { useRoute } from 'vue-router';
   import { useProjectSettingStore } from '@/store/modules/projectSetting';
+  import { PageFooter } from './components/Footer';
 
   const { getDarkTheme } = useDesignSetting();
   const {
-    // getShowFooter,
     getNavMode,
     getNavTheme,
     getHeaderSetting,

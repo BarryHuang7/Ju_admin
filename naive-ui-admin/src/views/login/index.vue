@@ -103,6 +103,8 @@
         </n-form>
       </div>
     </div>
+
+    <PageFooter />
   </div>
 </template>
 
@@ -115,6 +117,8 @@
   import { PersonOutline, LockClosedOutline, BarcodeOutline } from '@vicons/ionicons5';
   import { PageEnum } from '@/enums/pageEnum';
   import { websiteConfig } from '@/config/website.config';
+  import { PageFooter } from '@/layout/components/Footer';
+
   interface FormState {
     name: string;
     password: string;

@@ -1,11 +1,8 @@
 <template>
   <div class="page-footer">
     <div class="page-footer-link">
-      <a href="https://github.com/jekip/naive-ui-admin" target="_blank"> 官网 </a>
-      <a href="https://github.com/jekip/naive-ui-admin" target="_blank"> 社区 </a>
-      <a href="https://github.com/jekip/naive-ui-admin/issues" target="_blank"> 交流 </a>
+      <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026076782号</a>
     </div>
-    <div class="copyright"> naive-ui-admin 1.4 · Made by Ah jung </div>
   </div>
 </template>
 
