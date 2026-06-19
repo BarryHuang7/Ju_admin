@@ -97,6 +97,43 @@ server
         access_log  /www/wwwlogs/access.log;
     }
     
+server {
+    listen 80;
+    server_name hjpl.cn www.hjpl.cn;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# 设置私钥：所有者 root，组为 www-data，权限 640
+# sudo chown root:www-data /etc/nginx/ssl/server.key
+# sudo chmod 640 /etc/nginx/ssl/server.key
+
+# 设置证书：所有者 root，组为 www-data，权限 640 或 644
+# sudo chown root:www-data /etc/nginx/ssl/server.crt
+# sudo chmod 644 /etc/nginx/ssl/server.crt
+
+server {
+    listen 443 ssl;
+    server_name hjpl.cn www.hjpl.cn;
+
+    ssl_certificate /etc/nginx/ssl/server.crt;
+    ssl_certificate_key /etc/nginx/ssl/server.key;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
 server
     {
         listen       8080;
