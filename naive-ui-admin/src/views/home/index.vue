@@ -210,7 +210,7 @@
    */
   const copyLine = async () => {
     try {
-      await copy('http://110.41.16.194:8080/?u=guest2&p=123456');
+      await copy('https://hjpl.cn/?u=guest2&p=123456');
     } catch (err) {
       window['$message'].error('复制失败');
       console.error('复制失败！原因:', err);
