@@ -23,6 +23,8 @@ class CreateLoginInfoTable extends Migration
             $table->string('ip')->nullable();
             $table->date('date')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            // 索引
+            $table->index(['date', 'user_id', 'ip']);
         });
     }
 

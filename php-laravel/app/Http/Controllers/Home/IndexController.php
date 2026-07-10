@@ -38,7 +38,7 @@ class IndexController extends Controller
                 DB::raw('count(DISTINCT ip) as number')
             )
             ->where('user_id', '<>', 1)
-            ->whereRaw("date_format(date, '%Y-%m') = ?", [$where_month])
+            ->where('date', '>=', $where_month.'-01')
             ->groupBy('date')
             ->orderBy('date')
             ->get()
