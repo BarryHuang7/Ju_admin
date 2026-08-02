@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use App\Http\Requests\LoginVerificationPost;
 use App\Http\Controllers\Common\UtilsController;
+use App\Jobs\TaskScheduler;
 
 class LoginController extends Controller
 {
@@ -89,8 +90,9 @@ class LoginController extends Controller
                 $userId = $user->id;
                 $userName = $user->name;
                 $isAdmin = $user->is_admin;
+                $ip = (new UtilsController())->getClientRealIp($request);
 
-                $this->saveVisitorInfo($userId, $userName, $request);
+                $this->saveVisitorInfo($userId, $userName, $ip, $request);
                 $token = $this->getToken($userId, $userName);
                 // 保存redis，2小时过期
                 Redis::setex('Bearer ' . $token, 60 * 60 * 2, json_encode([
@@ -98,6 +100,14 @@ class LoginController extends Controller
                     'userName' => $userName,
                     'isAdmin' => $isAdmin
                 ]));
+
+                // 访客邮箱通知
+                if ($userId != 1) {
+                    TaskScheduler::dispatch(1, [
+                        'email' => env('MAIL_VISITOR_REMINDER_ADDRESS', 'hello@example.com'),
+                        'type' => 2
+                    ], $ip);
+                }
 
                 return response()->json([
                     'code' => 200,
@@ -151,12 +161,12 @@ class LoginController extends Controller
     /**
      * 保存访客信息
      */
-    private function saveVisitorInfo($userId, $userName, $request) {
+    private function saveVisitorInfo($userId, $userName, $ip, $request) {
         try {
             LoginInfo::insert([
                 'user_id' => $userId,
                 'user_name' => $userName,
-                'ip' => (new UtilsController())->getClientRealIp($request),
+                'ip' => $ip,
                 'date' => date('Y-m-d')
             ]);
         } catch (\Exception $e) {

@@ -104,10 +104,19 @@ class IndexController extends Controller
                 ->groupBy('ip');
         }, 't')->count();
 
+        // 累计访客
+        $cumulativeNumber = DB::table(function ($subQuery) {
+            $subQuery->select('ip')
+                ->from('login_info')
+                ->where('user_id', '<>', 1)
+                ->groupBy('ip');
+        }, 't')->count();;
+
         return response()->json([
             'code' => 200,
             'data' => [
-                'number' => $number
+                'number' => $number,
+                'cumulativeNumber' => $cumulativeNumber
             ],
             'msg' => 'Success'
         ]);

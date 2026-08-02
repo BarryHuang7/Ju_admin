@@ -74,7 +74,7 @@ class TaskScheduler implements ShouldQueue
 
             switch ($this->type) {
                 case 1:
-                    (new SendEmailController)->handleSendEmail($this->data, $this->ip);
+                    (new SendEmailController)->handleSendEmail($this->data['email'], $this->data['type'], $this->ip);
                     break;
                 case 2:
                     (new QWenConteroller)->handQWenAPI($this->data, $this->ip);

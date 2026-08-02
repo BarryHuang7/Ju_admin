@@ -18,6 +18,14 @@
       <template #suffix>人</template>
     </n-statistic>
 
+    <n-statistic tabular-nums class="mt-10">
+      <span>累计访客人数：</span>
+      <span c-green>
+        <n-number-animation :from="0" :to="CumulativeNumberOfLogins" />
+      </span>
+      <template #suffix>人</template>
+    </n-statistic>
+
     <div class="mt-20">
       <p c-green>功能列表：</p>
       <div>
@@ -93,6 +101,10 @@
    */
   const todayNumberOfLogins = ref(0);
   /**
+   * 累计访客人数
+   */
+  const CumulativeNumberOfLogins = ref(0);
+  /**
    * 尝试点击数
    */
   const i = ref(0);
@@ -158,6 +170,7 @@
 
     await toHttpByPHP(url, type).then((res) => {
       todayNumberOfLogins.value = res.data.number || 0;
+      CumulativeNumberOfLogins.value = res.data.cumulativeNumber || 0;
     });
   };
 

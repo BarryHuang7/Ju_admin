@@ -145,7 +145,7 @@ class SendEmailController extends Controller
                     $email = trim($e);
                     Log::info('正在发送邮箱【' . $email . '】');
 
-                    TaskScheduler::dispatch(1, $email, $ip);
+                    TaskScheduler::dispatch(1, [ 'email' => $email, 'type' => 1 ], $ip);
                 }
 
                 return response()->json([
@@ -168,15 +168,27 @@ class SendEmailController extends Controller
 
     /**
      * 处理发送邮箱逻辑
+     * 
+     * type 类型：1测试邮箱发送，2访客登录提醒
      */
-    public function handleSendEmail($email, $ip) {
+    public function handleSendEmail(string $email, int $type, string $ip)
+    {
         $flag = false;
-        Log::info('给【' . $email . '】发送邮箱。');
+        $subject = '新增访客';
+        $recipient = 'Admin';
+        $content = '访客+1 ip:' . $ip;
+        Log::info('给【' . $email . '】发送邮箱，类型' . $type . '。');
+
+        if ($type == 1) {
+            $subject = '测试邮箱';
+            $recipient = 'Guest';
+            $content = '你好！Guest!';
+        }
 
         try {
-            Mail::raw('你好！Guest!', function ($message) use ($email) {
-                $message->to($email, 'Guest')
-                    ->subject('测试邮箱');
+            Mail::raw($content, function ($message) use ($email, $recipient, $subject) {
+                $message->to($email, $recipient)
+                    ->subject($subject);
             });
             $flag = true;
         } catch (\Exception $e) {
