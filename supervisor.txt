@@ -1,0 +1,44 @@
+安装
+sudo apt-get update
+sudo apt-get install supervisor -y
+
+可以用 supervisord -v 检查版本，用 systemctl status supervisor 查看服务状态
+Supervisor 的配置文件通常放在 /etc/supervisor/conf.d/ 目录下，后缀一般是 .conf
+
+sudo vim /etc/supervisor/conf.d/hyperf.conf
+
+[program:hyperf]
+; 项目的根目录，必须使用绝对路径
+directory=/www/wwwroot/php-hyperf
+; 启动命令，必须用绝对路径指定php和hyperf.php
+command=/usr/bin/php /www/wwwroot/php-hyperf/bin/hyperf.php start
+; 运行进程的用户，建议不要用root，比如 www
+user=www
+; Supervisor启动时自动启动该应用
+autostart=true
+; 进程退出后自动重启
+autorestart=true
+; 等待10秒，确认服务已成功启动，防止误判
+startsecs=10
+; 启动失败重试次数
+startretries=3
+; 标准输出和错误日志路径
+stdout_logfile=/var/log/supervisor/hyperf-stdout.log
+stderr_logfile=/var/log/supervisor/hyperf-stderr.log
+
+:wq 保存并退出
+
+# 重新读取配置文件，启动新配置或有改动的进程
+sudo supervisorctl update
+
+# 查看所有被管理项目的状态
+sudo supervisorctl status
+
+# 启动 hyperf 应用
+sudo supervisorctl start hyperf
+
+# 重启 hyperf 应用
+sudo supervisorctl restart hyperf
+
+# 停止 hyperf 应用
+sudo supervisorctl stop hyperf
