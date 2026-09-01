@@ -238,6 +238,31 @@ server
             add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS' always;
             add_header Access-Control-Allow-Headers '*' always;
         }
+
+        
+        # php hyperf 反向代理 API 请求
+        location /phpHyperfApi/ {
+            proxy_pass http://127.0.0.1:9501/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Range $http_range;
+            proxy_set_header If-Range $http_if_range;
+            
+            # CORS 头
+            add_header Access-Control-Allow-Origin * always;
+            add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS, PUT, DELETE' always;
+            add_header Access-Control-Allow-Headers '*' always;
+            
+            # 处理 OPTIONS 预检请求
+            if ($request_method = 'OPTIONS') {
+                add_header Access-Control-Allow-Origin *;
+                add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS, PUT, DELETE';
+                add_header Access-Control-Allow-Headers '*';
+                return 204;
+            }
+        }
         
         # 前端静态文件
         location / {
