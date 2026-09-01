@@ -30,7 +30,7 @@
       <p c-green>功能列表：</p>
       <div>
         <div class="mt-20">前端语言是：vue 3 + typescript + naive-ui + tailwind</div>
-        <div class="mt-20">后端语言是：PHP 8.2 + Laravel 12</div>
+        <div class="mt-20">后端语言是：PHP 8.2 + Laravel 12 + Hyperf 3.2</div>
 
         <div class="mt-20">
           <n-button type="info" @click="skip(1)" class="md:mt-10 mr-10">图片列表</n-button>
@@ -63,8 +63,9 @@
 
 <script lang="ts" setup>
   import { ref, reactive, onMounted, computed } from 'vue';
-  import { toHttpByPHP } from '@/api/table/list';
-  import { guestRecord } from '@/api/php/home';
+  // import { toHttpByPHP } from '@/api/table/list';
+  // import { guestRecord } from '@/api/php/home';
+  import { indexInfo } from '@/api/hyperf/hyperf';
   import { useRouter } from 'vue-router';
   import { use } from 'echarts/core';
   import { CanvasRenderer } from 'echarts/renderers';
@@ -78,11 +79,11 @@
   import VChart from 'vue-echarts';
   import { useClipboard } from '@vueuse/core';
 
-  interface guestRecordDataType {
-    month: string;
-    xAxis: Array<string>;
-    series: Array<number>;
-  }
+  // interface guestRecordDataType {
+  //   month: string;
+  //   xAxis: Array<string>;
+  //   series: Array<number>;
+  // }
 
   const router = useRouter();
   use([
@@ -164,15 +165,15 @@
   /**
    * 获取今日访客数
    */
-  const getVisitorNumber = async () => {
-    const url = '/getVisitorNumber';
-    const type = 'GET';
+  // const getVisitorNumber = async () => {
+  //   const url = '/getVisitorNumber';
+  //   const type = 'GET';
 
-    await toHttpByPHP(url, type).then((res) => {
-      todayNumberOfLogins.value = res.data.number || 0;
-      CumulativeNumberOfLogins.value = res.data.cumulativeNumber || 0;
-    });
-  };
+  //   await toHttpByPHP(url, type).then((res) => {
+  //     todayNumberOfLogins.value = res.data.number || 0;
+  //     CumulativeNumberOfLogins.value = res.data.cumulativeNumber || 0;
+  //   });
+  // };
 
   /**
    * 按钮跳转
@@ -206,14 +207,46 @@
   /**
    * 获取访客图表数据
    */
-  const getGuestRecord = () => {
-    guestRecord().then((res: any) => {
-      const data: guestRecordDataType = res.data;
+  // const getGuestRecord = () => {
+  //   guestRecord().then((res: any) => {
+  //     const data: guestRecordDataType = res.data;
+
+  //     if (data) {
+  //       chartTitle.value = data.month + ' 访客记录';
+  //       chartXAxisData.push(...data.xAxis);
+  //       chartYAxisData.push(...data.series);
+  //     }
+  //   });
+  // };
+
+  /**
+   * 获取首页信息
+   */
+  const getIndexInfo = () => {
+    indexInfo().then((res: any) => {
+      const data: any = res.data;
 
       if (data) {
-        chartTitle.value = data.month + ' 访客记录';
-        chartXAxisData.push(...data.xAxis);
-        chartYAxisData.push(...data.series);
+        /**
+         * 获取访客图表数据
+         */
+        const guestRecord = data?.guestRecord?.data;
+
+        if (guestRecord) {
+          chartTitle.value = guestRecord.month + ' 访客记录';
+          chartXAxisData.push(...guestRecord.xAxis);
+          chartYAxisData.push(...guestRecord.series);
+        }
+
+        /**
+         * 获取今日访客数
+         */
+        const visitorNumber = data?.visitorNumber?.data;
+
+        if (visitorNumber) {
+          todayNumberOfLogins.value = visitorNumber.number || 0;
+          CumulativeNumberOfLogins.value = visitorNumber.cumulativeNumber || 0;
+        }
       }
     });
   };
@@ -230,8 +263,42 @@
     }
   };
 
+  /**
+   * 冒泡算法
+   */
+  // const bubbling = () => {
+  //   var arr = [23, 78, 99, 7, 56];
+  //   console.log('开始数组:' + arr);
+
+  //   for (var i = 0; i < arr.length - 1; i++) {
+  //     console.log('循环i:' + i);
+  //     var swapped = false;
+
+  //     for (var j = 0; j < arr.length - 1 - i; j++) {
+  //       console.log('循环j:' + j);
+
+  //       console.log('对比: ' + arr[j] + ' 与 ' + arr[j + 1]);
+  //       if (arr[j] > arr[j + 1]) {
+  //         var temp = arr[j];
+  //         arr[j] = arr[j + 1];
+  //         arr[j + 1] = temp;
+  //         swapped = true;
+  //       }
+  //     }
+  //     console.log('循环i:' + i + ' 结果:' + arr);
+
+  //     if (!swapped) {
+  //       console.log('提前结束');
+  //       break;
+  //     }
+  //   }
+
+  //   console.log('最终数组:' + arr);
+  // };
+
   onMounted(() => {
-    getVisitorNumber();
-    getGuestRecord();
+    // getVisitorNumber();
+    // getGuestRecord();
+    getIndexInfo();
   });
 </script>

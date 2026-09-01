@@ -21,6 +21,7 @@ const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix || '';
 const phpUrlPrefix = globSetting.phpUrlPrefix || '';
 const phpOctaneUrlPrefix = globSetting.phpOctaneUrlPrefix || '';
+const phpHyperfUrlPrefix = globSetting.phpHyperfUrlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
@@ -344,6 +345,23 @@ export const httpOctane = createAxios({
   requestOptions: {
     apiUrl: globSetting.apiUrl,
     urlPrefix: phpOctaneUrlPrefix,
+    withToken: true,
+    isReturnNativeResponse: false,
+    isTransformResponse: true,
+    joinTime: true,
+  },
+});
+
+/**
+ * 用于php hyperf http请求
+ */
+export const httpHyperf = createAxios({
+  timeout: 60 * 1000,
+  authenticationScheme: 'Bearer',
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
+  requestOptions: {
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: phpHyperfUrlPrefix,
     withToken: true,
     isReturnNativeResponse: false,
     isTransformResponse: true,
