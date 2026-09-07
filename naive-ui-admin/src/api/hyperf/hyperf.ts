@@ -9,3 +9,23 @@ export function indexInfo() {
     },
   });
 }
+
+export function generateByHyperf() {
+  return httpHyperf.request({
+    url: '/generateStock',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+export function flashSaleProductsByHyperf() {
+  return httpHyperf.request({
+    url: '/flashSaleProducts',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}

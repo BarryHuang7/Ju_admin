@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { simulationFlashSale, generate, remove, flashSaleProducts } from '@/api/php/order';
+  import { generateByHyperf, flashSaleProductsByHyperf } from '@/api/hyperf/hyperf';
 
   /**
    * 模拟抖动
@@ -15,9 +16,17 @@
    */
   const shaking = ref(false);
   /**
+   * 抖动
+   */
+  const shakingByHyperf = ref(false);
+  /**
    * 加载动画
    */
   const loading = ref(false);
+  /**
+   * 加载动画
+   */
+  const loadingByHyperf = ref(false);
   /**
    * 秒杀开始时间
    */
@@ -153,6 +162,55 @@
         });
     }
   };
+
+  /**
+   * 生成商品库存
+   */
+  const generateStock = () => {
+    generateByHyperf()
+      .then((res: any) => {
+        if (res.code === 200) {
+          window['$message'].success(res.msg);
+        } else {
+          window['$message'].error(res.msg);
+        }
+      })
+      .catch((e: any) => {
+        console.error(e);
+        window['$message'].error(e);
+      });
+  };
+
+  /**
+   * Hyperf 抢购
+   */
+  const flashSaleByHyperf = () => {
+    if (!shakingByHyperf.value) {
+      loadingByHyperf.value = true;
+      shakingByHyperf.value = true;
+
+      flashSaleProductsByHyperf()
+        .then((res: any) => {
+          if (res.code === 200) {
+            if (res.msg === '抢购成功') {
+              window['$message'].success(res.msg);
+            } else {
+              window['$message'].warning(res.msg);
+            }
+          } else {
+            window['$message'].error(res.msg);
+          }
+        })
+        .catch((e: any) => {
+          console.error(e);
+          window['$message'].error(e);
+        })
+        .finally(() => {
+          shakingByHyperf.value = false;
+          loadingByHyperf.value = false;
+        });
+    }
+  };
 </script>
 
 <template>
@@ -231,6 +289,34 @@
           </template>
           确定清除吗？
         </n-popconfirm>
+      </div>
+    </div>
+
+    <div class="mt-40">
+      <n-space vertical :size="12">
+        <n-alert title="功能说明" type="info">
+          <span>这是使用</span>
+          <span class="high-light">Hyperf 3.2</span>
+          <span>框架的秒杀接口。首先点击</span>
+          <span class="high-light">生成商品库存</span>
+          <span>按钮，再点击</span>
+          <span class="high-light">抢购</span>
+          <span>按钮。</span>
+        </n-alert>
+      </n-space>
+    </div>
+
+    <div class="mt-20 flex flex-col">
+      <div class="flex">
+        <n-button type="primary" @click="generateStock()">生成商品库存</n-button>
+        <n-button
+          type="primary"
+          class="ml-10"
+          @click="flashSaleByHyperf()"
+          :loading="loadingByHyperf"
+        >
+          抢购
+        </n-button>
       </div>
     </div>
   </div>

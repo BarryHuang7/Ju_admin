@@ -155,8 +155,8 @@ class OrderService
                     return [
                         'code' => 200,
                         'data' => '',
-                        'error' => '现在未有秒杀商品！',
-                        'msg' => '',
+                        'error' => '',
+                        'msg' => '现在未有秒杀商品！',
                 		'status' => 200
                     ];
                 }
@@ -167,8 +167,8 @@ class OrderService
                     return [
                         'code' => 422,
                         'data' => '',
-                        'error' => '你已抢到商品。请勿重复点击！',
-                        'msg' => '',
+                        'error' => '',
+                        'msg' => '你已抢到商品。请勿重复点击！',
                 		'status' => 200
                     ];
                 }
@@ -219,8 +219,8 @@ class OrderService
                     return [
                         'code' => 200,
                 		'data' => '',
-                        'error' => '手慢了已经抢光了！',
-                        'msg' => '',
+                        'error' => '',
+                        'msg' => '手慢了已经抢光了！',
                 		'status' => 200
                     ];
                 }
@@ -228,8 +228,8 @@ class OrderService
                 return [
                     'code' => 422,
                 	'data' => '',
-                    'error' => '请求繁忙，请稍后重试！',
-                    'msg' => '',
+                    'error' => '',
+                    'msg' => '请求繁忙，请稍后重试！',
                 	'status' => 200
                 ];
             }
@@ -260,6 +260,7 @@ class OrderService
 			Db::transaction(function () use ($productNumber) {
 				$product = ProductStock::query()
 					->where('product_number', $productNumber)
+					// 悲观锁
 					->lockForUpdate()
 					->first();
 				
