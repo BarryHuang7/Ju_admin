@@ -53,6 +53,7 @@ export interface GlobConfig {
   urlPrefix?: string;
   phpUrlPrefix?: string;
   phpOctaneUrlPrefix?: string;
+  phpHyperfUrlPrefix?: string;
   uploadUrl?: string;
   prodMock: boolean;
   imgUrl?: string;
@@ -69,6 +70,8 @@ export interface GlobEnvConfig {
   VITE_GLOB_PHP_API_URL_PREFIX?: string;
   // php octane 接口前缀
   VITE_GLOB_PHP_OCTANE_API_URL_PREFIX?: string;
+  // php hyperf 接口前缀
+  VITE_GLOB_PHP_HYPERF_API_URL_PREFIX?: string;
   // Project abbreviation
   VITE_GLOB_APP_SHORT_NAME: string;
   // 图片上传地址

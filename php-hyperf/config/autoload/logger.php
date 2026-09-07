@@ -33,5 +33,12 @@ return [
                 ],
             ],
         ],
+        'daily' => [
+            'driver' => 'daily',
+            'path' => BASE_PATH . '/runtime/logs/hyperf.log',
+            'level' => Level::Debug,
+            // 保留最近 30 天的日志文件
+            'days' => 30,
+        ],
     ],
 ];
