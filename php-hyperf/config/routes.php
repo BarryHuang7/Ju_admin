@@ -18,4 +18,6 @@ use Hyperf\HttpServer\Router\Router;
 
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Controller\IndexController@index');
 Router::post('/getIndexInfo', 'App\Controller\IndexController@getIndexInfo');
+
 Router::post('/generateStock', 'App\Controller\OrderController@generateStock');
+Router::post('/flashSaleProducts', 'App\Controller\OrderController@flashSaleProducts');

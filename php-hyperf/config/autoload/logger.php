@@ -10,7 +10,6 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 
 return [
@@ -18,10 +17,14 @@ return [
     'channels' => [
         'default' => [
             'handler' => [
-                'class' => StreamHandler::class,
+                'class' => Monolog\Handler\RotatingFileHandler::class,
                 'constructor' => [
-                    'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
-                    'level' => Level::Debug,
+                    'filename' => BASE_PATH . '/runtime/logs/hyperf.log',
+                    'maxFiles' => 30,
+                    'level' => Monolog\Logger::DEBUG,
+                    'bubble' => true,
+                    'filePermission' => null,
+                    'useLocking' => false,
                 ],
             ],
             'formatter' => [
@@ -32,13 +35,6 @@ return [
                     'allowInlineLineBreaks' => true,
                 ],
             ],
-        ],
-        'daily' => [
-            'driver' => 'daily',
-            'path' => BASE_PATH . '/runtime/logs/hyperf.log',
-            'level' => Level::Debug,
-            // 保留最近 30 天的日志文件
-            'days' => 30,
         ],
     ],
 ];

@@ -27,4 +27,17 @@ abstract class AbstractController
 
     #[Inject]
     protected ResponseInterface $response;
+
+    /**
+     * 返回json
+     */
+    protected function returnData(array $response)
+    {
+        return $this->response->json([
+            'code' => $response['code'] ?? 500,
+            'data' => $response['data'] ?? '',
+            'msg' => $response['msg'] ?? '',
+            'error' => $response['error'] ?? ''
+        ])->withStatus($response['status'] ?? 500);
+    }
 }
