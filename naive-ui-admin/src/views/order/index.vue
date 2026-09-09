@@ -301,7 +301,9 @@
           <span class="high-light">生成商品库存</span>
           <span>按钮，再点击</span>
           <span class="high-light">抢购</span>
-          <span>按钮。</span>
+          <span>按钮，抢购成功后会调用</span>
+          <span class="high-light">RabbitMQ</span>
+          <span>异步扣减库存。</span>
         </n-alert>
       </n-space>
     </div>

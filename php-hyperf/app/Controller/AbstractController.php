@@ -16,6 +16,7 @@ use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 abstract class AbstractController
 {
@@ -31,7 +32,7 @@ abstract class AbstractController
     /**
      * 返回json
      */
-    protected function returnData(array $response)
+    protected function returnData(array $response): PsrResponseInterface
     {
         return $this->response->json([
             'code' => $response['code'] ?? 500,

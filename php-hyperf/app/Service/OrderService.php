@@ -11,6 +11,7 @@ use Hyperf\DbConnection\Db;
 use Psr\Log\LoggerInterface;
 use Hyperf\Di\Annotation\Inject;
 use App\Amqp\Producers\TaskProducer;
+use App\Model\OrderRecord;
 
 class OrderService
 {
@@ -45,7 +46,7 @@ class OrderService
 	/**
 	 * 生成秒杀商品库存
 	 */
-	public function generateStockTask()
+	public function generateStockTask(): array
 	{
 		try {
             // 数据库原子操作
@@ -127,8 +128,11 @@ class OrderService
 
 	/**
      * 秒杀商品
+     * @param string $ip 请求ip地址
+     * @param string $authorization 请求认证
+     * @return array json
      */
-    public function flashSaleProductsTask(string $authorization)
+    public function flashSaleProductsTask(string $ip, string $authorization): array
 	{
 		try {
             $userInfo = $authorization ? json_decode($this->redis->get($authorization), true) : null;
@@ -204,8 +208,21 @@ class OrderService
                 ], 2);
 
                 if ($result == 1) {
+                    $this->logger->info("用户{$userID}【秒杀商品】成功");
+
                     // 队列减库存
-                    $message = new TaskProducer(['product_number' => self::PRODUCT_NUMBER]);
+                    $message = new TaskProducer([
+                        'ip' => $ip,
+                        'user_id' => $userID,
+                        'order_no' => '生产环境唯一索引',
+                        'order_name' => 'hyperf秒杀商品订单',
+                        'product_stock_id' => 678,
+                        'product_name' => '秒杀商品',
+                        'product_number' => self::PRODUCT_NUMBER,
+                        'stock' => 1,
+                        'remark' => 'hyperf秒杀商品',
+                        'retry_count' => 0
+                    ]);
                     $this->producer->produce($message);
 
                     return [
@@ -251,29 +268,76 @@ class OrderService
 
 	/**
      * 减商品库存
+     * @param array $data['product_number', 'ip', 'user_id', 'order_no', 'order_name', 'product_stock_id', 'product_name', 'stock', 'remark']
+     * @return void
      */
-    public function stockConsume(array $data)
+    public function stockConsume(array $data): void
     {
-        $productNumber = !empty($data['product_number']) ? $data['product_number'] : '';
+        try {
+            $productNumber = !empty($data['product_number']) ? $data['product_number'] : '';
+            $ip = !empty($data['ip']) ? $data['ip'] : '';
+            $userID = !empty($data['user_id']) ? $data['user_id'] : '';
+            $orderNo = !empty($data['order_no']) ? $data['order_no'] : '';
+            $orderName = !empty($data['order_name']) ? $data['order_name'] : '';
+            $productStockId = !empty($data['product_stock_id']) ? $data['product_stock_id'] : '';
+            $productName = !empty($data['product_name']) ? $data['product_name'] : '';
+            $stock = !empty($data['stock']) ? $data['stock'] : '';
+            $remark = !empty($data['remark']) ? $data['remark'] : '';
+    
+            if ($productNumber) {
+                Db::transaction(function () use ($ip, $userID, $orderNo, $orderName, $productStockId, $productName, $productNumber, $stock, $remark) {
+                    $product = ProductStock::query()
+                        ->where('product_number', $productNumber)
+                        // 悲观锁
+                        ->lockForUpdate()
+                        ->first();
+                    
+                    if ($product && $product->stock > 0) {
+                        $product->stock -= 1;
+                        $product->save();
 
-		if ($productNumber) {
-			Db::transaction(function () use ($productNumber) {
-				$product = ProductStock::query()
-					->where('product_number', $productNumber)
-					// 悲观锁
-					->lockForUpdate()
-					->first();
-				
-				if ($product && $product->stock > 0) {
-					$product->stock -= 1;
-					$product->save();
-				}
-			});
-		} else {
-			$this->logger->error("【减商品库存】失败", [
-				'data' => $data,
-                'trace' => $e->getTraceAsString()
+                        $newData = [
+                            'ip' => $ip,
+                            'user_id' => $userID,
+                            'order_no' => $orderNo,
+                            'order_name' => $orderName,
+                            'product_stock_id' => $productStockId,
+                            'product_name' => $productName,
+                            'product_number' => $productNumber,
+                            'stock' => $stock,
+                            'remark' => $remark
+                        ];
+
+                        // 生成订单记录
+                        $order = OrderRecord::create($newData);
+    
+                        $this->logger->info("【减商品库存】成功", $newData);
+                    }
+                });
+            } else {
+                $this->logger->error("【减商品库存】失败", [
+                    'data' => $data
+                ]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error("【减商品库存】catch失败", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
             ]);
-		}
+
+            if (!empty($data['retry_count']) && $data['retry_count'] < 2) {
+                // 重试逻辑
+                $data['retry_count'] += 1;
+                $this->logger->info("【减商品库存】重试第{$data['retry_count']}次", [
+                    'data' => $data
+                ]);
+                $this->stockConsume($data);
+            } else {
+                $this->logger->error("【减商品库存】重试失败，已达到最大重试次数", [
+                    'data' => $data
+                ]);
+            }
+        }
     }
 }

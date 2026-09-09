@@ -31,7 +31,17 @@ class OrderRecord extends Model
      * The attributes that are mass assignable.
      * @var list<string>
      */
-    protected array $fillable = [];
+    protected array $fillable = [
+        'ip',
+        'user_id',
+        'order_no',
+        'order_name',
+        'product_stock_id',
+        'product_name',
+        'product_number',
+        'stock',
+        'remark'
+    ];
 
     /**
      * The attributes that should be cast to native types.
