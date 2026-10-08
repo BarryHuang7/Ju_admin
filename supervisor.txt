@@ -42,3 +42,19 @@ sudo supervisorctl restart hyperf
 
 # 停止 hyperf 应用
 sudo supervisorctl stop hyperf
+
+
+sudo vim /etc/supervisor/conf.d/goapp.conf
+
+[program:goapp]
+# 启动命令，绝对路径
+command=/www/wwwroot/goapp
+# 程序运行时的工作目录，通常设为二进制文件所在目录
+directory=/www/wwwroot
+# 自动启动
+autostart=true
+# 进程意外退出时自动重启
+autorestart=true
+# 日志文件路径
+stdout_logfile=/var/log/supervisor/goapp.out.log
+stderr_logfile=/var/log/supervisor/goapp.err.log

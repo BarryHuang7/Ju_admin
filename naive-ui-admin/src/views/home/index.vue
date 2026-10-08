@@ -30,7 +30,9 @@
       <p c-green>功能列表：</p>
       <div>
         <div class="mt-20">前端语言是：vue 3 + typescript + naive-ui + tailwind</div>
-        <div class="mt-20">后端语言是：PHP 8.2 + Laravel 12 + Hyperf 3.2</div>
+        <div class="mt-20">
+          后端语言是：PHP 8.2 + Laravel 12 + Hyperf 3.2 + Golang 1.27.1 Gin框架
+        </div>
 
         <div class="mt-20">
           <n-button type="info" @click="skip(1)" class="md:mt-10 mr-10">图片列表</n-button>
@@ -44,6 +46,7 @@
             模拟商品秒杀
           </n-button>
           <n-button type="info" @click="skip(7)" class="mt-20 md:mt-10 mr-10">视频</n-button>
+          <n-button type="info" @click="skip(8)" class="mt-20 md:mt-10 mr-10">测试Go接口</n-button>
         </div>
 
         <div class="mt-20 inline-block">
@@ -66,6 +69,7 @@
   // import { toHttpByPHP } from '@/api/table/list';
   // import { guestRecord } from '@/api/php/home';
   import { indexInfo } from '@/api/hyperf/hyperf';
+  import { hello } from '@/api/go/go';
   import { useRouter } from 'vue-router';
   import { use } from 'echarts/core';
   import { CanvasRenderer } from 'echarts/renderers';
@@ -200,6 +204,12 @@
         break;
       case 7:
         router.push('/video/vido-upload');
+        break;
+      case 8:
+        hello().then((res: any) => {
+          const data: any = res.data;
+          window['$message'].success(data.msg || '请求成功');
+        });
         break;
     }
   };

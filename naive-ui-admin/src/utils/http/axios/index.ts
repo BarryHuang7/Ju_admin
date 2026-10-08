@@ -22,6 +22,7 @@ const urlPrefix = globSetting.urlPrefix || '';
 const phpUrlPrefix = globSetting.phpUrlPrefix || '';
 const phpOctaneUrlPrefix = globSetting.phpOctaneUrlPrefix || '';
 const phpHyperfUrlPrefix = globSetting.phpHyperfUrlPrefix || '';
+const goUrlPrefix = globSetting.goUrlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
@@ -362,6 +363,23 @@ export const httpHyperf = createAxios({
   requestOptions: {
     apiUrl: globSetting.apiUrl,
     urlPrefix: phpHyperfUrlPrefix,
+    withToken: true,
+    isReturnNativeResponse: false,
+    isTransformResponse: true,
+    joinTime: true,
+  },
+});
+
+/**
+ * 用于go http请求
+ */
+export const httpGo = createAxios({
+  timeout: 60 * 1000,
+  authenticationScheme: 'Bearer',
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
+  requestOptions: {
+    apiUrl: globSetting.apiUrl,
+    urlPrefix: goUrlPrefix,
     withToken: true,
     isReturnNativeResponse: false,
     isTransformResponse: true,
