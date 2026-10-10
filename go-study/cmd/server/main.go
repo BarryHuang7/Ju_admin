@@ -16,8 +16,8 @@ import (
 
 func main() {
 	var httpPort string = "6077"
-	var redisAddr string = "110.41.16.194"
-	var redisPassword string = "151417redis"
+	var redisAddr string = ""
+	var redisPassword string = ""
 	var redisPort string = "6379"
 
 	// 初始化 Redis 连接
