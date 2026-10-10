@@ -208,7 +208,7 @@
       case 8:
         hello().then((res: any) => {
           const data: any = res.data;
-          window['$message'].success(data.msg || '请求成功');
+          window['$message'].success(data.message || '请求成功');
         });
         break;
     }
