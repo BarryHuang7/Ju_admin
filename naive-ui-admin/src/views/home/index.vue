@@ -33,6 +33,10 @@
         <div class="mt-20">
           后端语言是：PHP 8.2 + Laravel 12 + Hyperf 3.2 + Golang 1.27.1 Gin框架
         </div>
+        <div class="mt-20">
+          GitHub地址：
+          <a href="https://github.com/BarryHuang7/" target="_blank">https://github.com/BarryHuang7/</a>
+        </div>
 
         <div class="mt-20">
           <n-button type="info" @click="skip(1)" class="md:mt-10 mr-10">图片列表</n-button>
